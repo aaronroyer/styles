@@ -1,3 +1,5 @@
+require 'term/ansicolor'
+
 module Styles
   module Properties
     FOREGROUND_COLOR_VALUES = [:black, :red, :green, :yellow, :blue, :magenta, :cyan, :white]
@@ -33,6 +35,10 @@ module Styles
             values
           end
         end
+      end
+
+      def color
+        ::Term::ANSIColor
       end
     end
   end

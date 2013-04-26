@@ -1,5 +1,3 @@
-require 'term/ansicolor'
-
 module Styles
   module Properties
     class Color < Base
@@ -31,10 +29,6 @@ module Styles
         end
 
         nil
-      end
-
-      def color
-        ::Term::ANSIColor
       end
     end
   end
