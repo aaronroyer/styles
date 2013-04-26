@@ -1,9 +1,8 @@
 module Styles
   module Properties
-    COLOR_VALUES = [
-      :black, :red, :green, :yellow, :blue, :magenta, :cyan, :white,
-      :on_black, :on_red, :on_green, :on_yellow, :on_blue, :on_magenta, :on_cyan, :on_white,
-    ]
+    FOREGROUND_COLOR_VALUES = [:black, :red, :green, :yellow, :blue, :magenta, :cyan, :white]
+    BACKGROUND_COLOR_VALUES = [:on_black, :on_red, :on_green, :on_yellow, :on_blue, :on_magenta, :on_cyan, :on_white]
+    COLOR_VALUES = FOREGROUND_COLOR_VALUES + BACKGROUND_COLOR_VALUES
 
     class Base
       attr_accessor :value, :selector
@@ -14,7 +13,7 @@ module Styles
 
       # Apply this property to a line and returned the result
       def apply(line)
-        raise NotImplementedError
+        raise NotImplementedError, "apply method needs to be implemented for class: #{self.class.name}"
       end
 
       # Add a method to each subclass to scan the constants for valid values or arrays of values

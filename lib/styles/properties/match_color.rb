@@ -3,7 +3,7 @@ require 'term/ansicolor'
 module Styles
   module Properties
     class MatchColor < Base
-      VALUES = ::Styles::Properties::COLOR_VALUES
+      VALUES = ::Term::ANSIColor.attributes
 
       def apply(line)
         return line unless VALUES.include?(value)
