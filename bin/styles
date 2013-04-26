@@ -1,0 +1,20 @@
+#!/usr/bin/env ruby
+
+begin
+  require 'styles'
+rescue LoadError
+  executable = File.symlink?(__FILE__) ? File.readlink(__FILE__) : __FILE__
+  $:.unshift File.join(File.dirname(executable), '..', 'lib')
+  require 'styles'
+end
+
+stylesheet_name = ARGV[0] || 'default'
+stylesheet_file = File.join(Styles.filters_dir, "#{stylesheet_name}.rb")
+
+stylesheet = Styles::Stylesheet.from_string("#{stylesheet_name.capitalize}Filter", IO.read(stylesheet_file)).new
+
+stream = $stdin
+while line = stream.gets
+  result = stylesheet.process(line)
+  puts result if result
+end

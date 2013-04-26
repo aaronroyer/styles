@@ -1,0 +1,23 @@
+require 'term/ansicolor'
+
+module Styles
+  module Properties
+    class MatchColor < Base
+      VALUES = ::Styles::Properties::COLOR_VALUES
+
+      def apply(line)
+        return line unless VALUES.include?(value)
+        # TODO: Handle situation where color codes can be matched and wreck everything - the problem
+        #       can come up when you are trying to match a number in already colorized text. Should
+        #       color be stripped from the input first by default?
+        line.gsub(selector) {|match| "#{color.send(value)}#{match}#{color.reset}" }
+      end
+
+      private
+
+      def color
+        ::Term::ANSIColor
+      end
+    end
+  end
+end
