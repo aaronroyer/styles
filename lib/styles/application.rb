@@ -11,14 +11,16 @@ module Styles
     attr_accessor :stylesheet_names
 
     def process
-      stylesheet = stylesheets.first
-      input_stream = $stdin
-      output_stream = $stdout
+      input_stream, output_stream = $stdin, $stdout
 
       while line = input_stream.gets
-        result = stylesheet.process(line)
+        result = engine.process(line)
         output_stream.puts result if result
       end
+    end
+
+    def engine
+      @engine ||= Styles::Engine.new(stylesheets)
     end
 
     def stylesheets

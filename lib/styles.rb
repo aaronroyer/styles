@@ -3,6 +3,7 @@ require 'styles/core_ext'
 require 'styles/properties'
 require 'styles/rule'
 require 'styles/stylesheet'
+require 'styles/engine'
 require 'styles/application'
 
 module Styles
