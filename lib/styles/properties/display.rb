@@ -10,7 +10,7 @@ module Styles
         elsif HIDE_VALUES.include? value
           nil
         else
-          # TODO: custom exception to DRY this up?
+          # TODO: Custom exception? Should this raise an exception at all?
           raise "Unrecognized value for 'display' property: #{value}"
         end
       end

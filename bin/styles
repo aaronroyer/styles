@@ -8,13 +8,4 @@ rescue LoadError
   require 'styles'
 end
 
-stylesheet_name = ARGV[0] || 'default'
-stylesheet_file = File.join(Styles.filters_dir, "#{stylesheet_name}.rb")
-
-stylesheet = Styles::Stylesheet.from_string("#{stylesheet_name.capitalize}Filter", IO.read(stylesheet_file)).new
-
-stream = $stdin
-while line = stream.gets
-  result = stylesheet.process(line)
-  puts result if result
-end
+Styles::Application.new.run
