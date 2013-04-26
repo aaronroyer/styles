@@ -1,16 +1,24 @@
 module Styles
-
-  # Contains any Stylesheet classes created by parsing stylesheet text
-  module Stylesheets
-  end
-
   class Stylesheet
+    METHOD_MISSING_EXCLUSIONS = [:to_ary]
 
     # Create a new Stylesheet class with the given name from the given stylesheet text.
-    def self.from_string(name, text)
-      stylesheet = Class.new(Stylesheet)
-      stylesheet.class_eval(text)
-      ::Styles::Stylesheets.const_set(name, stylesheet)
+    def self.from_string(text)
+      stylesheet = new
+      stylesheet.instance_eval(text)
+      $stylesheet_currently_being_built = nil
+      stylesheet
+    end
+
+    # Sets the object being built to a global variable indicating which Stylesheet is currently
+    # being built. This is for DSL support and allows the use of the "-" method on core types
+    # to add rules to Stylesheets. See core_ext.rb for more details.
+    def initialize
+      $stylesheet_currently_being_built = self
+    end
+
+    def rules
+      @rules ||= []
     end
 
     # Supports the DSL for stylesheets, making them more attractive and CSS-y by allowing
@@ -22,25 +30,16 @@ module Styles
     #
     #   color: :red
     #
-    def self.method_missing(name)
-      name
+    def method_missing(name)
+      if METHOD_MISSING_EXCLUSIONS.include? name
+        super
+      else
+        name
+      end
     end
 
-    # Get the rules for this Stylesheet class (stored in a class instance variable)
-    def self.rules
-      @rules ||= []
-    end
-
-    def self.add_rule(selector, properties_hash)
+    def add_rule(selector, properties_hash)
       rules << Rule.new(selector, properties_hash)
-    end
-
-    def self.inherited(subclass)
-      $stylesheet_currently_being_built = subclass
-    end
-
-    def rules
-      self.class.rules
     end
   end
 end

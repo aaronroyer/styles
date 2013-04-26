@@ -35,7 +35,7 @@ module Styles
     def create_stylesheets
       stylesheet_names.each do |name|
         file = File.join(::Styles.stylesheets_dir, "#{name}.rb")
-        stylesheets << ::Styles::Stylesheet.from_string("#{name.capitalize}Stylesheet", IO.read(file)).new
+        stylesheets << ::Styles::Stylesheet.from_string(IO.read(file))
       end
     end
   end

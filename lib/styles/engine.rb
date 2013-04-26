@@ -5,7 +5,7 @@ module Styles
     attr_reader :stylesheets
 
     def initialize(*stylesheets)
-      @stylesheets = Array(stylesheets).flatten
+      @stylesheets = [stylesheets].flatten
     end
 
     # Process a line according to the rules that comprise all of the Stylesheets.

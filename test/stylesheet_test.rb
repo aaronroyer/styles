@@ -2,10 +2,6 @@ require File.expand_path('../test_helper', __FILE__)
 require 'term/ansicolor'
 
 class StylesheetTest < MiniTest::Unit::TestCase
-  def teardown
-    Styles::Stylesheets.constants.each { |const| Styles::Stylesheets.send(:remove_const, const) }
-  end
-
   def test_can_create_a_stylesheet_from_a_string
     stylesheet_text = <<-STYLESHEET
       'good' - {
@@ -21,7 +17,7 @@ class StylesheetTest < MiniTest::Unit::TestCase
       }
     STYLESHEET
 
-    sheet = Styles::Stylesheet.from_string('TestSheet', stylesheet_text)
+    sheet = Styles::Stylesheet.from_string(stylesheet_text)
     assert_equal 3, sheet.rules.size
 
     rules = {}
