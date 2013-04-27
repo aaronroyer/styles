@@ -1,8 +1,7 @@
-require 'styles/properties/base'
-require 'styles/properties/display'
-
-require 'styles/properties/color'
-require 'styles/properties/background_color'
-require 'styles/properties/match_color'
-
-require 'styles/properties/font_weight'
+%w[
+  base
+  display
+  color background_color match_color
+  font_weight text_decoration
+]
+.each { |property| require "styles/properties/#{property}" }
