@@ -7,7 +7,18 @@ require 'styles/engine'
 require 'styles/application'
 
 module Styles
-  DEFAULT_DIR = File.join(ENV['HOME'], '.styles')
+  def self.home_dir
+    home = ENV['HOME']
+    home = ENV['USERPROFILE'] unless home
+    if !home && (ENV['HOMEDRIVE'] && ENV['HOMEPATH'])
+      home = File.join(ENV['HOMEDRIVE'], ENV['HOMEPATH'])
+    end
+    home = File.expand_path('~') unless home
+    home = 'C:/' if !home && RUBY_PLATFORM =~ /mswin|mingw/
+    home
+  end
+
+  DEFAULT_DIR = File.join(home_dir, '.styles')
 
   def self.stylesheets_dir
     ENV['STYLES_DIR'] || DEFAULT_DIR
