@@ -3,6 +3,8 @@ module Styles
     class MatchColor < Base
       VALUES = ::Term::ANSIColor.attributes
 
+      strip_original_color
+
       def apply(line)
         return line unless VALUES.include?(value)
         # TODO: Handle situation where color codes can be matched and wreck everything - the problem

@@ -8,4 +8,9 @@ class BaseTest < MiniTest::Unit::TestCase
     assert_equal expected_valid_values.length, valid_values.length
     expected_valid_values.each {|val| assert valid_values.include?(val) }
   end
+
+  def test_strip_original_color_is_specified
+    assert !Styles::Properties::Display.strip_original_color?
+    assert Styles::Properties::Color.strip_original_color?
+  end
 end

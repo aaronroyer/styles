@@ -1,3 +1,5 @@
+require 'term/ansicolor'
+
 module Styles
 
   # Takes one or more Stylesheets and applies the rules from them to lines of text.
@@ -17,14 +19,17 @@ module Styles
     def process(line)
       applicable_rules = rules.find_all { |rule| rule.applicable?(line) }
 
-      properties = {}
+      properties_hash = {}
       applicable_rules.each do |rule|
         rule.properties.each do |property|
-          properties[property.class.name.downcase.to_sym] = property
+          properties_hash[property.class.name.downcase.to_sym] = property
         end
       end
+      properties = properties_hash.values
 
-      properties.values.inject(line.dup) do |line_before, property|
+      line = preprocess(line, properties)
+
+      properties.inject(line.dup) do |line_before, property|
         line_after = property.apply(line_before)
         return nil unless line_after
         line_after
@@ -35,6 +40,18 @@ module Styles
 
     def rules
       @rules ||= stylesheets.map(&:rules).flatten
+    end
+
+    def preprocess(line, properties)
+      if properties.any? { |p| p.class.strip_original_color? }
+        color.uncolor line
+      else
+        line
+      end
+    end
+
+    def color
+      ::Term::ANSIColor
     end
   end
 end

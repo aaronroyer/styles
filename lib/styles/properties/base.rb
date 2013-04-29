@@ -18,8 +18,11 @@ module Styles
         raise NotImplementedError, "apply method needs to be implemented for class: #{self.class.name}"
       end
 
-      # Add a method to each subclass to scan the constants for valid values or arrays of values
+      # Add PreprocessorMacros and add a method to each subclass to scan the constants for valid
+      # values or arrays of values
       def self.inherited(subclass)
+        subclass.extend PreprocessorMacros
+
         subclass.class_eval do
           def self.valid_values
             values = []
@@ -39,6 +42,18 @@ module Styles
 
       def color
         ::Term::ANSIColor
+      end
+    end
+
+    module PreprocessorMacros
+      # By default do not strip original colors out of the line.
+      def strip_original_color?
+        false
+      end
+
+      # Specify that any color should be stripped from lines before processing.
+      def strip_original_color
+        define_singleton_method(:strip_original_color?) { true }
       end
     end
   end

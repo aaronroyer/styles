@@ -1,16 +1,20 @@
 module Styles
   module Properties
     class Color < Base
-      VALUES = ::Term::ANSIColor.attributes
+      VALUES = ::Term::ANSIColor.attributes + [:none]
+
+      strip_original_color
 
       def apply(line)
         return line unless value_valid?
+        return "#{color.reset}#{line}" if value == :none
         "#{start_color_codes}#{line.chomp}#{color.reset}"
       end
 
       private
 
       def value_valid?
+        return true if value == :none
         !!start_color_codes
       end
 
