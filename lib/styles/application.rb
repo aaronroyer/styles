@@ -6,13 +6,11 @@ module Styles
     def run
       create_stylesheets_dir
       parse_args
-      create_stylesheets
+      read_stylesheets
       process
     end
 
     private
-
-    attr_accessor :stylesheet_names
 
     def process
       input_stream, output_stream = $stdin, $stdout
@@ -36,6 +34,10 @@ module Styles
         opts.on('--edit [NAME]', 'Edit stylesheet with given NAME (\'default\' by default)') do |name|
           safe_exec which_editor, stylesheet_file(name ||= 'default')
         end
+        opts.on('--list', 'List names of available stylesheets') do
+          Dir.entries(stylesheets_dir).grep(/\.rb$/).each { |ss| puts ss.sub(/\.rb$/, '') }
+          exit
+        end
         opts.on_tail('-h', '--help', 'Show this message') do
           puts opts
           exit
@@ -45,12 +47,11 @@ module Styles
           exit
         end
       end.parse!
-
-      self.stylesheet_names = ARGV.dup
-      stylesheet_names << 'default' if stylesheet_names.empty?
     end
 
-    def create_stylesheets
+    def read_stylesheets
+      stylesheet_names = ARGV.dup
+      stylesheet_names << 'default' if stylesheet_names.empty?
       stylesheet_names.each do |name|
         stylesheets << ::Styles::Stylesheet.from_string(IO.read(stylesheet_file(name)))
       end
