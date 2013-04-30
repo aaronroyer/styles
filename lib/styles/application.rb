@@ -4,6 +4,7 @@ require 'pathname'
 module Styles
   class Application
     def run
+      create_stylesheets_dir
       parse_args
       create_stylesheets
       process
@@ -76,8 +77,35 @@ module Styles
       exec "/bin/sh", "-i", "-c", cmd + ' "$@"', "--", *args
     end
 
+    def create_stylesheets_dir
+      return if File.directory? stylesheets_dir
+      if File.exist? stylesheets_dir
+        # TODO: raise a custom exception that is caught and outputs something nice
+        raise "Not a directory: #{stylesheets_dir}"
+      else
+        Dir.mkdir stylesheets_dir
+      end
+    end
+
     def stylesheet_file(name)
-      File.join(::Styles.stylesheets_dir, "#{name}.rb")
+      File.join(stylesheets_dir, "#{name}.rb")
+    end
+
+    def stylesheets_dir
+      @stylesheets_dir ||= ENV['STYLES_DIR'] || File.join(home_dir, '.styles')
+    end
+
+    def home_dir
+      @home_dir ||= begin
+        home = ENV['HOME']
+        home = ENV['USERPROFILE'] unless home
+        if !home && (ENV['HOMEDRIVE'] && ENV['HOMEPATH'])
+          home = File.join(ENV['HOMEDRIVE'], ENV['HOMEPATH'])
+        end
+        home = File.expand_path('~') unless home
+        home = 'C:/' if !home && RUBY_PLATFORM =~ /mswin|mingw/
+        home
+      end
     end
   end
 end
