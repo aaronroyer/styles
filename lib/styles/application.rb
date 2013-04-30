@@ -1,3 +1,6 @@
+require 'optparse'
+require 'pathname'
+
 module Styles
   class Application
     def run
@@ -28,15 +31,53 @@ module Styles
     end
 
     def parse_args
+      OptionParser.new do |opts|
+        opts.on('--edit [NAME]', 'Edit stylesheet with given NAME (\'default\' by default)') do |name|
+          safe_exec which_editor, stylesheet_file(name ||= 'default')
+        end
+        opts.on_tail('-h', '--help', 'Show this message') do
+          puts opts
+          exit
+        end
+        opts.on_tail('--version', 'Show version') do
+          puts "Styles version: #{Styles::VERSION}"
+          exit
+        end
+      end.parse!
+
       self.stylesheet_names = ARGV.dup
       stylesheet_names << 'default' if stylesheet_names.empty?
     end
 
     def create_stylesheets
       stylesheet_names.each do |name|
-        file = File.join(::Styles.stylesheets_dir, "#{name}.rb")
-        stylesheets << ::Styles::Stylesheet.from_string(IO.read(file))
+        stylesheets << ::Styles::Stylesheet.from_string(IO.read(stylesheet_file(name)))
       end
+    end
+
+    def which_editor
+      editor = ENV['STYLES_EDITOR'] || ENV['EDITOR']
+      return editor unless editor.nil?
+
+      %w[subl mate].each {|e| return e if which(e) }
+
+      '/usr/bin/vim'
+    end
+
+    def which(cmd)
+      dir = ENV['PATH'].split(':').find {|p| File.executable? File.join(p, cmd)}
+      Pathname.new(File.join(dir, cmd)) unless dir.nil?
+    end
+
+    # Properly quote and evaluate of environment variables in the cmd parameter. This
+    # and a few other things related to firing up an editor are borrowed or pretty much
+    # cribbed from Homebrew (github.com/mxcl/homebrew).
+    def safe_exec(cmd, *args)
+      exec "/bin/sh", "-i", "-c", cmd + ' "$@"', "--", *args
+    end
+
+    def stylesheet_file(name)
+      File.join(::Styles.stylesheets_dir, "#{name}.rb")
     end
   end
 end
