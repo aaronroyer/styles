@@ -15,6 +15,8 @@ module Styles
     def process
       input_stream, output_stream = $stdin, $stdout
 
+      ['INT', 'TERM'].each { |signal| trap(signal) { exit } }
+
       while line = input_stream.gets
         result = engine.process(line)
         output_stream.puts result if result
