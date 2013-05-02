@@ -1,5 +1,6 @@
 require 'styles/version'
 require 'styles/core_ext'
+require 'styles/colors'
 require 'styles/properties'
 require 'styles/rule'
 require 'styles/stylesheet'

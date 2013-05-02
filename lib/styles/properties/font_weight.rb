@@ -6,7 +6,7 @@ module Styles
       strip_original_color
 
       def apply(line)
-        value == :bold ? "#{color.bold}#{line.chomp}#{color.reset}" : line
+        value == :bold ? "#{colors[:bold]}#{line.chomp}#{colors[:reset]}" : line
       end
     end
   end

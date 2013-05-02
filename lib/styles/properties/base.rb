@@ -40,8 +40,8 @@ module Styles
         end
       end
 
-      def color
-        ::Term::ANSIColor
+      def colors
+        ::Styles::Colors
       end
     end
 
