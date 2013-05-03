@@ -1,10 +1,14 @@
 module Styles
   module Properties
     class BackgroundColor < Base
-      def apply(line)
-        return line unless colors.is_basic_color?(value)
-        bg_color = value =~ /^on_/ ? value : "on_#{value}".to_sym
-        "#{colors[bg_color]}#{line.chomp}#{colors[:reset]}"
+      sub_engine :color
+
+      VALUES = (Styles::Colors::COLOR_VALUES + [:none]).freeze
+      SKIP_VALUES = [:none].freeze
+
+      # Convert foreground colors to background
+      def color_to_use
+        value =~ /^on_/ ? value : "on_#{value}".to_sym
       end
     end
   end

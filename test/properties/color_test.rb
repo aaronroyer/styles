@@ -17,11 +17,6 @@ class ColorTest < MiniTest::Unit::TestCase
     assert_equal test_line, ::Styles::Properties::Color.new(:sunshine).apply(test_line)
   end
 
-  def test_none_value_removes_color
-    test_line = 'this line should not have color'
-    assert_equal "#{color.reset}#{test_line}", ::Styles::Properties::Color.new(:none).apply(test_line)
-  end
-
   private
 
   def color

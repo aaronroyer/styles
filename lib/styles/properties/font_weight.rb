@@ -1,13 +1,10 @@
 module Styles
   module Properties
     class FontWeight < Base
-      VALUES = [:normal, :bold]
+      sub_engine :color
 
-      strip_original_color
-
-      def apply(line)
-        value == :bold ? "#{colors[:bold]}#{line.chomp}#{colors[:reset]}" : line
-      end
+      VALUES = [:normal, :bold].freeze
+      SKIP_VALUES = [:normal].freeze
     end
   end
 end

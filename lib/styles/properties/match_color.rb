@@ -1,8 +1,6 @@
 module Styles
   module Properties
     class MatchColor < Base
-      strip_original_color
-
       def apply(line)
         if value.is_a? Array
           return line unless selector.is_a?(Regexp) && value.all? { |a_color| colors.is_basic_color?(a_color) }

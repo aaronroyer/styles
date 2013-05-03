@@ -1,20 +1,20 @@
 require 'term/ansicolor'
 
 module Styles
-  # Map CSS-style value to ANSI code name, where they are different
-  CSS_TO_ANSI_VALUES = {
-    :line_through => :strikethrough
-  }.freeze
-
-  VALID_VALUES = (::Term::ANSIColor.attributes + [:none] + CSS_TO_ANSI_VALUES.keys).freeze
-
-  FOREGROUND_COLOR_VALUES = [:black, :red, :green, :yellow, :blue, :magenta, :cyan, :white].freeze
-  BACKGROUND_COLOR_VALUES = [:on_black, :on_red, :on_green, :on_yellow, :on_blue, :on_magenta, :on_cyan, :on_white].freeze
-  COLOR_VALUES = (FOREGROUND_COLOR_VALUES + BACKGROUND_COLOR_VALUES).freeze
-
   # Basically a wrapper around Term::ANSIColor but also adds combination foreground and background
   # colors (e.g. :red_on_white). Returns nil with an invalid color specification.
   class Colors
+    # Map CSS-style value to ANSI code name, where they are different
+    CSS_TO_ANSI_VALUES = {
+      :line_through => :strikethrough
+    }.freeze
+
+    VALID_VALUES = (::Term::ANSIColor.attributes + [:none] + CSS_TO_ANSI_VALUES.keys).freeze
+
+    FOREGROUND_COLOR_VALUES = [:black, :red, :green, :yellow, :blue, :magenta, :cyan, :white].freeze
+    BACKGROUND_COLOR_VALUES = [:on_black, :on_red, :on_green, :on_yellow, :on_blue, :on_magenta, :on_cyan, :on_white].freeze
+    COLOR_VALUES = (FOREGROUND_COLOR_VALUES + BACKGROUND_COLOR_VALUES).freeze
+
     def self.[](color)
       if is_valid_basic_value? color
         color = CSS_TO_ANSI_VALUES[color] || color

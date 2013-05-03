@@ -51,17 +51,6 @@ class EngineTest < MiniTest::Unit::TestCase
     assert_nil engine.process('this line has hide this in it')
   end
 
-  def test_original_colors_stripped_for_correct_properties
-    test_line = "this line #{color.red}had color#{color.reset}"
-    test_line_without_color = 'this line had color'
-
-    do_not_strip_sheet = Styles::Stylesheet.from_string(':all - { display: block }')
-    do_strip_sheet = Styles::Stylesheet.from_string(':all - { font_weight: normal }')
-
-    assert_equal test_line, Styles::Engine.new(do_not_strip_sheet).process(test_line)
-    assert_equal test_line_without_color, Styles::Engine.new(do_strip_sheet).process(test_line)
-  end
-
   private
 
   def color

@@ -1,13 +1,12 @@
 module Styles
   module Properties
     class TextDecoration < Base
-      # CSS value is line-through and not strikethrough, but include strikethrough as well
-      VALUES = [:none, :underline, :line_through, :strikethrough, :blink]
+      sub_engine :color
 
-      def apply(line)
-        return line unless VALUES.include?(value) && value != :none
-        "#{colors[value]}#{line.chomp}#{colors[:reset]}"
-      end
+      # CSS value is line-through and not strikethrough, but include strikethrough as well
+      VALUES = [:none, :underline, :line_through, :strikethrough, :blink].freeze
+      SKIP_VALUES = [:none].freeze
+      COLOR_PROPERTY_TYPE = :whole_line
     end
   end
 end

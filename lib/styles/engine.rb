@@ -27,8 +27,6 @@ module Styles
       end
       properties = properties_hash.values
 
-      line = preprocess(line, properties)
-
       properties.inject(line.dup) do |line_before, property|
         line_after = property.apply(line_before)
         return nil unless line_after
@@ -40,14 +38,6 @@ module Styles
 
     def rules
       @rules ||= stylesheets.map(&:rules).flatten
-    end
-
-    def preprocess(line, properties)
-      if properties.any? { |p| p.class.strip_original_color? }
-        color.uncolor line
-      else
-        line
-      end
     end
 
     def color

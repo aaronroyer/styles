@@ -1,23 +1,13 @@
 module Styles
   module Properties
     class Color < Base
-      strip_original_color
+      sub_engine :color
 
-      def apply(line)
-        return line unless value_valid?
-        return "#{colors[:reset]}#{line}" if value == :none
-        "#{start_color_codes}#{line.chomp}#{colors[:reset]}"
-      end
+      SKIP_VALUES = [:none].freeze
 
-      private
-
-      def value_valid?
+      def valid_value?
         return true if value == :none
-        !!start_color_codes
-      end
-
-      def start_color_codes
-        @start_color_codes ||= colors[value]
+        colors[value]
       end
     end
   end
