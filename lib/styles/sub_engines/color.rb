@@ -1,13 +1,44 @@
 module Styles
   module SubEngines
     class Color
+      # Get the property type (:line or :match) of a property instance
+      def self.property_type(property)
+        klass = property.class
+        if klass.constants.include?(:COLOR_PROPERTY_TYPE) && klass::COLOR_PROPERTY_TYPE == :match
+          :match
+        else
+          :line
+        end
+      end
+
+      def process(properties, line)
+        line_properties, match_properties = properties.partition { |p| self.class.property_type(p) == :line }
+
+        line_properties.reject! { |p| !p.valid_value? }
+        unless line_properties.empty?
+          line_color_codes = line_properties.map(&:value).sort.map { |color| colors[color] }.join
+        end
+
+        if line_color_codes
+          "#{line_color_codes}#{line}#{colors[:reset]}"
+        else
+          line
+        end
+      end
+
+      private
+
+      def colors
+        ::Styles::Colors
+      end
+
       module PropertyMixin
         def apply(line)
           klass = self.class
           if klass.constants.include?(:SKIP_VALUES) && klass::SKIP_VALUES.include?(value)
             line
-          elsif has_valid_value?
-            if klass.constants.include?(:COLOR_PROPERTY_TYPE) && klass::COLOR_PROPERTY_TYPE == :match
+          elsif valid_value?
+            if ::Styles::SubEngines::Color.property_type(self) == :match
               apply_to_matches(line)
             else
               apply_to_line(line)
@@ -20,6 +51,10 @@ module Styles
         # Can be overridden if the color to use should be derived differently
         def color_to_use
           value
+        end
+
+        def valid_value?
+          self.class::VALUES.include?(value)
         end
 
         private
@@ -65,18 +100,6 @@ module Styles
 
           colored_line
         end
-
-        def has_valid_value?
-          if respond_to?(:valid_value?)
-            valid_value?
-          else
-            self.class::VALUES.include?(value)
-          end
-        end
-      end
-
-      def process(properties, line)
-        #
       end
     end
   end
