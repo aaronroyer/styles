@@ -4,7 +4,6 @@ require 'term/ansicolor'
 class ColorSubEngineTest < MiniTest::Unit::TestCase
   def test_can_render_color_and_match_color_correctly
     sub_engine = Styles::SubEngines::Color.new
-    # sub_engine.process
   end
 
   private
