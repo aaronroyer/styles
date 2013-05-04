@@ -6,53 +6,82 @@ class MatchColorTest < MiniTest::Unit::TestCase
     test_line = 'this is a test line, to be colored'
 
     assert_equal "this is a #{color.red}test#{color.reset} line, to be colored",
-      ::Styles::Properties::MatchColor.new(:red, 'test').apply(test_line)
-
+      apply(:red, 'test', test_line)
     assert_equal "#{color.blue}this is#{color.reset} a test line, to be colored",
-      ::Styles::Properties::MatchColor.new(:blue, 'this is').apply(test_line)
+      apply(:blue, 'this is', test_line)
+
+    assert_equal "this is a #{color.red}test#{color.reset} line, to be colored",
+      process_with_sub_engine(:red, 'test', test_line)
+    assert_equal "#{color.blue}this is#{color.reset} a test line, to be colored",
+      process_with_sub_engine(:blue, 'this is', test_line)
   end
 
   def test_applies_correct_colors_to_multiple_string_selector_matches
     assert_equal "#{color.green}the#{color.reset} word #{color.green}the#{color.reset} is repeated",
-      ::Styles::Properties::MatchColor.new(:green, 'the').apply('the word the is repeated')
+      apply(:green, 'the', 'the word the is repeated')
+
+    assert_equal "#{color.green}the#{color.reset} word #{color.green}the#{color.reset} is repeated",
+      process_with_sub_engine(:green, 'the', 'the word the is repeated')
   end
 
   def test_applies_correct_colors_to_regex_matches
     assert_equal "the number #{color.green}89#{color.reset} is in this line",
-      ::Styles::Properties::MatchColor.new(:green, /\d\d/).apply('the number 89 is in this line')
+      apply(:green, /\d\d/, 'the number 89 is in this line')
+
+    assert_equal "the number #{color.green}89#{color.reset} is in this line",
+      process_with_sub_engine(:green, /\d\d/, 'the number 89 is in this line')
   end
 
   def test_applies_correct_colors_to_multiple_regex_matches
     assert_equal "the numbers #{color.blue}89#{color.reset} and #{color.blue}22#{color.reset} are in this line",
-      ::Styles::Properties::MatchColor.new(:blue, /\d\d/).apply('the numbers 89 and 22 are in this line')
+      apply(:blue, /\d\d/, 'the numbers 89 and 22 are in this line')
+
+    assert_equal "the numbers #{color.blue}89#{color.reset} and #{color.blue}22#{color.reset} are in this line",
+      process_with_sub_engine(:blue, /\d\d/, 'the numbers 89 and 22 are in this line')
   end
 
   def test_can_use_multiple_colors_to_match_groups
-    $snap = false
     assert_equal "this has some color: #{color.red}this#{color.reset}",
-      ::Styles::Properties::MatchColor.new([:red], /color: (\w+)/).apply('this has some color: this')
-
+      apply([:red], /color: (\w+)/, 'this has some color: this')
     assert_equal "numbers #{color.green}one#{color.reset} and #{color.yellow}two#{color.reset}",
-      ::Styles::Properties::MatchColor.new([:green, :yellow], /(one)[\s\w]+(two)/).apply('numbers one and two')
-
+      apply([:green, :yellow], /(one)[\s\w]+(two)/, 'numbers one and two')
     assert_equal "#{color.cyan}1#{color.reset} #{color.magenta}2#{color.reset} #{color.black}3#{color.reset}",
-      ::Styles::Properties::MatchColor.new([:cyan, :magenta, :black], /(\d) (\d) (\d)/).apply('1 2 3')
+      apply([:cyan, :magenta, :black], /(\d) (\d) (\d)/, '1 2 3')
+
+    assert_equal "this has some color: #{color.red}this#{color.reset}",
+      process_with_sub_engine([:red], /color: (\w+)/, 'this has some color: this')
+    assert_equal "numbers #{color.green}one#{color.reset} and #{color.yellow}two#{color.reset}",
+      process_with_sub_engine([:green, :yellow], /(one)[\s\w]+(two)/, 'numbers one and two')
+    assert_equal "#{color.cyan}1#{color.reset} #{color.magenta}2#{color.reset} #{color.black}3#{color.reset}",
+      process_with_sub_engine([:cyan, :magenta, :black], /(\d) (\d) (\d)/, '1 2 3')
   end
 
   def test_applies_colors_correctly_with_different_numbers_of_colors_and_match_groups
-    $snap = true
     assert_equal "numbers #{color.green}one#{color.reset} and two",
-      ::Styles::Properties::MatchColor.new([:green, :yellow], /(one)[\s\w]+two/).apply('numbers one and two')
-
+      apply([:green, :yellow], /(one)[\s\w]+two/, 'numbers one and two')
     assert_equal "numbers #{color.green}one#{color.reset} and two",
-      ::Styles::Properties::MatchColor.new([:green], /(one)[\s\w]+(two)/).apply('numbers one and two')
-
+      apply([:green], /(one)[\s\w]+(two)/, 'numbers one and two')
     assert_equal "numbers #{color.green}one#{color.reset} and #{color.red}two#{color.reset} and three",
-      ::Styles::Properties::MatchColor.new([:green, :red], /(one)[\s\w]+(two)[\s\w]+three/).apply('numbers one and two and three')
-    $snap = false
+      apply([:green, :red], /(one)[\s\w]+(two)[\s\w]+three/, 'numbers one and two and three')
+
+    assert_equal "numbers #{color.green}one#{color.reset} and two",
+      process_with_sub_engine([:green, :yellow], /(one)[\s\w]+two/, 'numbers one and two')
+    assert_equal "numbers #{color.green}one#{color.reset} and two",
+      process_with_sub_engine([:green], /(one)[\s\w]+(two)/, 'numbers one and two')
+    assert_equal "numbers #{color.green}one#{color.reset} and #{color.red}two#{color.reset} and three",
+      process_with_sub_engine([:green, :red], /(one)[\s\w]+(two)[\s\w]+three/, 'numbers one and two and three')
   end
 
   private
+
+  def apply(value, selector, line)
+    ::Styles::Properties::MatchColor.new(value, selector).apply(line)
+  end
+
+  def process_with_sub_engine(value, selector, line)
+    sub_engine = ::Styles::SubEngines::Color.new
+    sub_engine.process [::Styles::Properties::MatchColor.new(value, selector)], line
+  end
 
   def color
     ::Term::ANSIColor
