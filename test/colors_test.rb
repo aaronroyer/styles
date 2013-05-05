@@ -20,6 +20,18 @@ class ColorsTest < MiniTest::Unit::TestCase
     assert_nil c[:bogus_on_red]
   end
 
+  def test_can_access_multiple_colors_with_brackets
+    assert_equal color.red + color.white, c[:red, :white]
+    assert_equal color.red + color.white + color.blue, c[:red, :white, :blue]
+    assert_equal color.red + color.white + color.on_blue, c[:red, :white_on_blue]
+  end
+
+  def test_can_use_arrays_of_colors_with_brackets
+    assert_equal color.red + color.white, c[[:red, :white]]
+    assert_equal color.red + color.white + color.blue, c[[:red, :white, :blue]]
+    assert_equal color.red + color.white + color.on_blue, c[[:red, :white_on_blue]]
+  end
+
   def test_maps_certain_css_values_to_ansi
     assert_equal color.strikethrough, c[:line_through]
   end

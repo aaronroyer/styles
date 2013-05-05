@@ -15,12 +15,23 @@ module Styles
     BACKGROUND_COLOR_VALUES = [:on_black, :on_red, :on_green, :on_yellow, :on_blue, :on_magenta, :on_cyan, :on_white].freeze
     COLOR_VALUES = (FOREGROUND_COLOR_VALUES + BACKGROUND_COLOR_VALUES).freeze
 
-    def self.[](color)
-      if is_valid_basic_value? color
-        color = CSS_TO_ANSI_VALUES[color] || color
-        ansi_color.send color
-      elsif colors = is_compound_color?(color)
-        "#{ansi_color.send(colors[0])}#{ansi_color.send(colors[1])}"
+    # Retrieve color codes with the corresponding symbol. Can be basic colors like :red or
+    # "compound" colors specifying foreground and background colors like :red_on_blue.
+    #
+    # Any number of colors can be specified, either as multiple arguments or in an array.
+    def self.[](*colors)
+      colors.flatten!
+      valid_colors = []
+      colors.each do |color|
+        if is_valid_basic_value? color
+          valid_colors << (CSS_TO_ANSI_VALUES[color] || color)
+        elsif color_parts = is_compound_color?(color)
+          valid_colors += color_parts
+        end
+      end
+
+      unless valid_colors.empty?
+        valid_colors.inject('') { |str, color| str += ansi_color.send(color) }
       end
     end
 
