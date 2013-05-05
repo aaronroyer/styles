@@ -4,16 +4,16 @@ require 'term/ansicolor'
 class ColorsTest < MiniTest::Unit::TestCase
 
   def test_can_access_basic_colors_with_brackets
-    assert_equal color.red, c[:red]
-    assert_equal color.blue, c[:blue]
-    assert_equal color.on_cyan, c[:on_cyan]
+    assert_equal ansi.red, c[:red]
+    assert_equal ansi.blue, c[:blue]
+    assert_equal ansi.on_cyan, c[:on_cyan]
 
     assert_nil c[:bogus]
   end
 
   def test_can_access_compound_colors_with_brackets
-    assert_equal color.red + color.on_white, c[:red_on_white]
-    assert_equal color.blue + color.on_blue, c[:blue_on_blue]
+    assert_equal ansi.red + ansi.on_white, c[:red_on_white]
+    assert_equal ansi.blue + ansi.on_blue, c[:blue_on_blue]
 
     assert_nil c[:red_on_bogus]
     assert_nil c[:bogus_on_bogus]
@@ -21,19 +21,19 @@ class ColorsTest < MiniTest::Unit::TestCase
   end
 
   def test_can_access_multiple_colors_with_brackets
-    assert_equal color.red + color.white, c[:red, :white]
-    assert_equal color.red + color.white + color.blue, c[:red, :white, :blue]
-    assert_equal color.red + color.white + color.on_blue, c[:red, :white_on_blue]
+    assert_equal ansi.red + ansi.white, c[:red, :white]
+    assert_equal ansi.red + ansi.white + ansi.blue, c[:red, :white, :blue]
+    assert_equal ansi.red + ansi.white + ansi.on_blue, c[:red, :white_on_blue]
   end
 
   def test_can_use_arrays_of_colors_with_brackets
-    assert_equal color.red + color.white, c[[:red, :white]]
-    assert_equal color.red + color.white + color.blue, c[[:red, :white, :blue]]
-    assert_equal color.red + color.white + color.on_blue, c[[:red, :white_on_blue]]
+    assert_equal ansi.red + ansi.white, c[[:red, :white]]
+    assert_equal ansi.red + ansi.white + ansi.blue, c[[:red, :white, :blue]]
+    assert_equal ansi.red + ansi.white + ansi.on_blue, c[[:red, :white_on_blue]]
   end
 
   def test_maps_certain_css_values_to_ansi
-    assert_equal color.strikethrough, c[:line_through]
+    assert_equal ansi.strikethrough, c[:line_through]
   end
 
   def test_basic_colors_are_valid
@@ -63,23 +63,23 @@ class ColorsTest < MiniTest::Unit::TestCase
   end
 
   def test_hard_color_transitions
-    assert_equal color.red, c.color_transition([:blue], [:red])
-    assert_equal color.red, c.color_transition(:blue, :red)
-    assert_equal color.reset + color.red, c.color_transition(:on_blue, :red)
-    assert_equal color.red + color.on_white, c.color_transition([:green, :on_blue], [:red, :on_white])
-    assert_equal color.reset + color.underline, c.color_transition(:blue, :underline)
-    assert_equal color.reset + color.blue, c.color_transition(:underline, :blue)
+    assert_equal ansi.red, c.color_transition([:blue], [:red])
+    assert_equal ansi.red, c.color_transition(:blue, :red)
+    assert_equal ansi.reset + ansi.red, c.color_transition(:on_blue, :red)
+    assert_equal ansi.red + ansi.on_white, c.color_transition([:green, :on_blue], [:red, :on_white])
+    assert_equal ansi.reset + ansi.underline, c.color_transition(:blue, :underline)
+    assert_equal ansi.reset + ansi.blue, c.color_transition(:underline, :blue)
   end
 
   def test_soft_color_transitions
-    assert_equal color.red, c.color_transition([:blue], [:red], false)
-    assert_equal color.red, c.color_transition([:on_blue], [:red], false)
-    assert_equal color.on_red, c.color_transition([:blue], [:on_red], false)
-    assert_equal color.red, c.color_transition([:green, :on_blue], [:red], false)
-    assert_equal color.underline, c.color_transition(:blue, :underline, false)
-    assert_equal color.blue, c.color_transition(:underline, :blue, false)
+    assert_equal ansi.red, c.color_transition([:blue], [:red], false)
+    assert_equal ansi.red, c.color_transition([:on_blue], [:red], false)
+    assert_equal ansi.on_red, c.color_transition([:blue], [:on_red], false)
+    assert_equal ansi.red, c.color_transition([:green, :on_blue], [:red], false)
+    assert_equal ansi.underline, c.color_transition(:blue, :underline, false)
+    assert_equal ansi.blue, c.color_transition(:underline, :blue, false)
 
-    assert_equal color.red, c.color_transition([:blue], [:red], false)
+    assert_equal ansi.red, c.color_transition([:blue], [:red], false)
     assert_equal '', c.color_transition([:blue], [:blue], false)
   end
 
@@ -92,13 +92,46 @@ class ColorsTest < MiniTest::Unit::TestCase
     assert_equal '', c.color_transition([:blue, :on_white], [:on_white, :blue])
   end
 
+  def test_color_transition_with_negations
+    assert_equal ansi.reset, c.color_transition(:blue, :no_fg_color)
+    assert_equal ansi.reset, c.color_transition(:on_blue, :no_bg_color)
+    assert_equal ansi.reset, c.color_transition(:blue, :no_bg_color)
+
+    assert_equal ansi.reset, c.color_transition([:blue, :on_white], :no_bg_color)
+    assert_equal ansi.reset + ansi.red, c.color_transition([:blue, :on_white], [:red, :no_bg_color])
+    assert_equal ansi.reset + ansi.blue, c.color_transition([:blue, :on_white], [:blue, :no_bg_color])
+
+    assert_equal ansi.reset + ansi.red, c.color_transition([:blue, :on_white], [:red, :no_bg_color])
+    assert_equal ansi.reset + ansi.blue, c.color_transition([:blue, :on_white], [:blue, :no_bg_color])
+
+    assert_equal ansi.blue, c.color_transition(:no_fg_color, :blue)
+    assert_equal ansi.on_red, c.color_transition(:no_bg_color, :on_red)
+    assert_equal '', c.color_transition([:blue, :no_bg_color], :blue)
+
+
+    assert_equal ansi.reset, c.color_transition(:blue, :no_fg_color, false)
+    assert_equal ansi.reset, c.color_transition(:on_blue, :no_bg_color, false)
+    assert_equal '', c.color_transition(:blue, :no_bg_color, false)
+
+    assert_equal ansi.reset + ansi.blue, c.color_transition([:blue, :on_white], :no_bg_color, false)
+    assert_equal ansi.reset + ansi.red, c.color_transition([:blue, :on_white], [:red, :no_bg_color], false)
+    assert_equal ansi.reset + ansi.blue, c.color_transition([:blue, :on_white], [:blue, :no_bg_color], false)
+
+    assert_equal ansi.reset + ansi.red, c.color_transition([:blue, :on_white], [:red, :no_bg_color], false)
+    assert_equal ansi.reset + ansi.blue, c.color_transition([:blue, :on_white], [:blue, :no_bg_color], false)
+
+    assert_equal ansi.blue, c.color_transition(:no_fg_color, :blue, false)
+    assert_equal ansi.on_red, c.color_transition(:no_bg_color, :on_red, false)
+    assert_equal '', c.color_transition([:blue, :no_bg_color], :blue, false)
+  end
+
   private
 
   def c
     ::Styles::Colors
   end
 
-  def color
+  def ansi
     ::Term::ANSIColor
   end
 end

@@ -9,11 +9,27 @@ module Styles
       :line_through => :strikethrough
     }.freeze
 
-    VALID_VALUES = (::Term::ANSIColor.attributes + [:none] + CSS_TO_ANSI_VALUES.keys).freeze
+    FOREGROUND_COLOR_VALUES = [
+      :black, :red, :green, :yellow, :blue, :magenta, :cyan, :white
+    ].freeze
 
-    FOREGROUND_COLOR_VALUES = [:black, :red, :green, :yellow, :blue, :magenta, :cyan, :white].freeze
-    BACKGROUND_COLOR_VALUES = [:on_black, :on_red, :on_green, :on_yellow, :on_blue, :on_magenta, :on_cyan, :on_white].freeze
+    BACKGROUND_COLOR_VALUES = [
+      :on_black, :on_red, :on_green, :on_yellow, :on_blue, :on_magenta, :on_cyan, :on_white
+    ].freeze
+
     COLOR_VALUES = (FOREGROUND_COLOR_VALUES + BACKGROUND_COLOR_VALUES).freeze
+    OTHER_STYLE_VALUES = [:bold, :italic, :underline, :underscore, :blink, :strikethrough]
+
+    # Only :reset is available to represent the complete absence of color and styling. There are no
+    # fine-grained negative codes to just remove foreground color or just remove bold. Our API
+    # should provide these to allow these kind of fine-grained transitions to other color states.
+    NEGATIVE_PSEUDO_VALUES = [
+      :no_fg_color, :no_bg_color, :no_bold, :no_italic, :no_underline,
+      :no_underscore, :no_blink, :no_strikethrough
+    ].freeze
+
+    VALID_VALUES = (::Term::ANSIColor.attributes + [:none] + CSS_TO_ANSI_VALUES.keys).freeze
+    VALID_VALUES_AND_PSEUDO_VALUES = (VALID_VALUES + NEGATIVE_PSEUDO_VALUES).freeze
 
     # Retrieve color codes with the corresponding symbol. Can be basic colors like :red or
     # "compound" colors specifying foreground and background colors like :red_on_blue.
@@ -76,46 +92,106 @@ module Styles
       before_colors = [before_colors] unless before_colors.is_a?(Array)
       after_colors = [after_colors] unless after_colors.is_a?(Array)
 
-      before_categories, after_categories = categorize_colors(before_colors), categorize_colors(after_colors)
+      before_categories, after_categories = categorize(before_colors), categorize(after_colors)
 
       # Nothing to do if before and after colors are the same
       return '' if before_categories == after_categories
 
       transition = ''
+      should_reset = false
+      colors_to_apply = []
 
-      # Explicit reset is necessary if all colors are not replaced and we want a hard reset
-      transition << c(:reset) if hard && before_categories.keys.sort != after_categories.keys.sort
+      # Explicit reset is necessary if we want a hard transition and all colors in all
+        # categories are not replaced.
+      if hard
+        before_categories.each_pair do |cat, before_color|
+          next if negative?(before_color)
+          after_color = after_categories[cat]
+          if !after_color || negative?(after_color)
+            should_reset = true
+            break
+          end
+        end
+      end
 
-      after_categories.each_pair { |cat, color| transition << c(color) }
+      # If soft transition then the only time we need an explicit reset is when we have a color
+      # in a category that is explicitly turned off with a negative value. This also applies
+      # to hard transitions.
+      after_categories.each_pair do |cat, after_color|
+        before_color = before_categories[cat]
+        if before_color && negative?(after_color) && !negative?(before_color)
+          should_reset = true
+        end
+      end
 
+      after_categories.each_pair do |cat, after_color|
+        before_color = before_categories[cat]
+        if !negative?(after_color)
+          transition << c(after_color) unless before_color == after_color && !should_reset
+        end
+      end
+
+      # If we are resetting but using a soft transition then all colors execept negated ones
+      # need to be set again after the reset.
+      if should_reset && !hard
+        before_categories.values.each do |color|
+          unless negative?(color) || after_categories.values.include?(negate(color))
+            transition << c(color) unless after_categories.keys.include?(category(color))
+          end
+        end
+      end
+
+      transition.prepend(c(:reset)) if should_reset
       transition
     end
 
     private
 
-    # Put colors into categories which include background (:bg) and foreground (:fg). All other
-    # types of colors are in their own category. Only the last color of each type will end up being
-    # in a given category and results are returned as a hash (category => color). This is in
-    # support of the color_transition method so the results are a bit specifically tailored.
-    def self.categorize_colors(colors)
+    def self.categorize(colors)
       categories = {}
-      colors.each do |color|
-        category = if FOREGROUND_COLOR_VALUES.include? color
-                     :fg
-                   elsif BACKGROUND_COLOR_VALUES.include? color
-                     :bg
-                   else
-                     color
-                   end
-        categories[category] = color
-      end
+      colors.each { |color| categories[category(color)] = color }
       categories
+    end
+
+    # Get the category of a color.
+    #
+    # Foreground colors are in the :fg_color category, background colors in :bg_color. Other style
+    # "colors" are in their own category (:bold, :underline, etc.). Negative pseudo-values are in
+    # the category they negate, so :no_fg_color is in :fg_color and :no_bold is in :bold.
+    def self.category(color)
+      return nil unless VALID_VALUES_AND_PSEUDO_VALUES.include?(color)
+
+      if FOREGROUND_COLOR_VALUES.include?(color) || color == :no_fg_color
+        :fg_color
+      elsif BACKGROUND_COLOR_VALUES.include?(color) || color == :no_bg_color
+        :bg_color
+      else
+        color.to_s.sub(/^no_/, '').to_sym
+      end
+    end
+
+    # Get the negative pseudo-value for a color or style. Compound colors and already
+    # negative values cannot be negated.
+    def self.negate(color)
+      return nil unless is_valid_basic_value?(color)
+
+      if FOREGROUND_COLOR_VALUES.include?(color)
+        :no_fg_color
+      elsif BACKGROUND_COLOR_VALUES.include?(color)
+        :no_bg_color
+      else
+        color.to_s.prepend('no_').to_sym
+      end
     end
 
     # Is this a valid non-compound value? Includes colors but also stuff like :bold and
     # other non-color things.
     def self.is_valid_basic_value?(color)
       VALID_VALUES.include?(color)
+    end
+
+    def self.negative?(color)
+      NEGATIVE_PSEUDO_VALUES.include?(color)
     end
 
     def self.ansi_color
