@@ -14,50 +14,49 @@ module Styles
       def process(properties, line)
         line_properties, match_properties = properties.partition { |p| self.class.property_type(p) == :line }
 
-        line_color_codes = compute_line_color_codes(line_properties)
+        line_colors = get_line_colors(line_properties)
 
         colored_line = line.dup.chomp
 
         colored_line = match_properties.inject(colored_line) do |updated_line, prop|
           if prop.selector.is_a? String
-            apply_string_match_property(prop, line_color_codes, updated_line)
+            apply_string_match_property(prop, line_colors, updated_line)
           elsif prop.selector.is_a? Regexp
-            apply_regex_match_property(prop, line_color_codes, updated_line)
+            apply_regex_match_property(prop, line_colors, updated_line)
           else
             # No support for Symbol selectors
             colored_line
           end
         end
 
-        line_color_codes ? "#{line_color_codes}#{colored_line}#{colors[:reset]}" : colored_line
+        line_colors ? "#{colors[line_colors]}#{colored_line}#{colors[:reset]}" : colored_line
       end
 
       private
 
-      def compute_line_color_codes(line_properties)
+      def get_line_colors(line_properties)
         line_properties.reject! { |p| !p.valid_value? || p.class::SKIP_VALUES.include?(p.value) }
         unless line_properties.empty?
-          line_color_codes = line_properties.map(&:color_to_use).sort.map { |color| colors[color] }.join
+          line_properties.map(&:color_to_use).sort
         end
-        line_color_codes
       end
 
       # Apply a match property that has a String selector to the given line. Takes into account
-      # line property color codes and makes sure the rest of the line has those applied to it.
-      def apply_string_match_property(property, line_color_codes, line)
+      # line property colors and makes sure the rest of the line has those applied to it.
+      def apply_string_match_property(property, line_colors, line)
         color = [property.value].flatten.first
-        reset = line_color_codes ? colors[:reset] : '' # Only reset if there are colors to reset
-        line.gsub(property.selector, "#{reset}#{colors[color]}\\0#{colors[:reset]}#{line_color_codes}")
+        reset = line_colors ? colors[:reset] : '' # Only reset if there are colors to reset
+        line.gsub(property.selector, "#{reset}#{colors[color]}\\0#{colors[:reset]}#{colors[line_colors]}")
       end
 
-      def apply_regex_match_property(property, line_color_codes, line)
+      def apply_regex_match_property(property, line_colors, line)
         selector, value = property.selector, property.value
         if value.is_a? Array
           return line unless selector.is_a?(Regexp)
-          apply_colors_to_multiple_matches(property, line_color_codes, line)
+          apply_colors_to_multiple_matches(property, line_colors, line)
         elsif value.is_a? Symbol
-          reset = line_color_codes ? colors[:reset] : '' # Only reset if there are colors to reset
-          line.gsub(selector) { |match| "#{reset}#{colors[value]}#{match}#{colors[:reset]}#{line_color_codes}" }
+          reset = line_colors ? colors[:reset] : '' # Only reset if there are colors to reset
+          line.gsub(selector) { |match| "#{reset}#{colors[value]}#{match}#{colors[:reset]}#{colors[line_colors]}" }
         else
           line
         end
@@ -67,11 +66,11 @@ module Styles
       # of colors to the each match group, first color to first group and so on. Ignore the last
       # match groups if they do not have corresponding colors and vice versa.
       #
-      # If there are color codes that should be applied to the entire line then make sure to turn
-      # them off before applying match colors and back on after the match.
-      def apply_colors_to_multiple_matches(property, line_color_codes, line)
-        before_match_codes, after_match_codes = if line_color_codes && !line_color_codes.empty?
-          [colors[:reset], colors[:reset] + line_color_codes]
+      # If there are color that should be applied to the entire line then make sure to turn them
+      # off before applying match colors and back on after the match.
+      def apply_colors_to_multiple_matches(property, line_colors, line)
+        before_match_codes, after_match_codes = if line_colors && !line_colors.empty?
+          [colors[:reset], colors[:reset] + colors[line_colors]]
         else
           ['', colors[:reset]]
         end

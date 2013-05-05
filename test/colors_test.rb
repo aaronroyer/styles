@@ -62,6 +62,36 @@ class ColorsTest < MiniTest::Unit::TestCase
     assert c.valid?(:line_through), 'Mapped values are also valid'
   end
 
+  def test_hard_color_transitions
+    assert_equal color.red, c.color_transition([:blue], [:red])
+    assert_equal color.red, c.color_transition(:blue, :red)
+    assert_equal color.reset + color.red, c.color_transition(:on_blue, :red)
+    assert_equal color.red + color.on_white, c.color_transition([:green, :on_blue], [:red, :on_white])
+    assert_equal color.reset + color.underline, c.color_transition(:blue, :underline)
+    assert_equal color.reset + color.blue, c.color_transition(:underline, :blue)
+  end
+
+  def test_soft_color_transitions
+    assert_equal color.red, c.color_transition([:blue], [:red], false)
+    assert_equal color.red, c.color_transition([:on_blue], [:red], false)
+    assert_equal color.on_red, c.color_transition([:blue], [:on_red], false)
+    assert_equal color.red, c.color_transition([:green, :on_blue], [:red], false)
+    assert_equal color.underline, c.color_transition(:blue, :underline, false)
+    assert_equal color.blue, c.color_transition(:underline, :blue, false)
+
+    assert_equal color.red, c.color_transition([:blue], [:red], false)
+    assert_equal '', c.color_transition([:blue], [:blue], false)
+  end
+
+  def test_color_transitions_blank_when_not_necessary
+    assert_equal '', c.color_transition([:blue], [:blue])
+    assert_equal '', c.color_transition([:on_white], [:on_white])
+    assert_equal '', c.color_transition([:underline], [:underline])
+    assert_equal '', c.color_transition([:blue, :on_white], [:blue, :on_white])
+    assert_equal '', c.color_transition([:blue, :on_white, :underline], [:blue, :on_white, :underline])
+    assert_equal '', c.color_transition([:blue, :on_white], [:on_white, :blue])
+  end
+
   private
 
   def c

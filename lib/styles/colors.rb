@@ -35,6 +35,10 @@ module Styles
       end
     end
 
+    class << self
+      alias_method :c, :[]
+    end
+
     def self.valid?(color)
       is_valid_basic_value?(color) || is_compound_color?(color)
     end
@@ -54,7 +58,59 @@ module Styles
       end
     end
 
+    # Produces a string of color codes to transition from one set of colors to another.
+    #
+    # If hard is true then all foregound and background colors are reset before adding the after
+    # colors. In other words, no colors are allowed to continue, even if not replaced.
+    #
+    # If hard is false then colors that are not explicitly replaced by new colors are not reset.
+    # This means that if there are foreground and background before colors and only a foreground
+    # after color then even though the foreground color is replaced by the new one the background
+    # color is allowed to continue and is not explicitly reset.
+    #
+    # Regardless of whether all colors are reset, output of unnecessary codes is avoided. This
+    # means, for example, that if any before colors are replaced by new colors of the same
+    # category (foreground, background, underline, etc.) then there will never be an explicit
+    # reset because that would be redundant and merely add more characters.
+    def self.color_transition(before_colors, after_colors, hard=true)
+      before_colors = [before_colors] unless before_colors.is_a?(Array)
+      after_colors = [after_colors] unless after_colors.is_a?(Array)
+
+      before_categories, after_categories = categorize_colors(before_colors), categorize_colors(after_colors)
+
+      # Nothing to do if before and after colors are the same
+      return '' if before_categories == after_categories
+
+      transition = ''
+
+      # Explicit reset is necessary if all colors are not replaced and we want a hard reset
+      transition << c(:reset) if hard && before_categories.keys.sort != after_categories.keys.sort
+
+      after_categories.each_pair { |cat, color| transition << c(color) }
+
+      transition
+    end
+
     private
+
+    # Put colors into categories which include background (:bg) and foreground (:fg). All other
+    # types of colors are in their own category. Only the last color of each type will end up being
+    # in a given category and results are returned as a hash (category => color). This is in
+    # support of the color_transition method so the results are a bit specifically tailored.
+    def self.categorize_colors(colors)
+      categories = {}
+      colors.each do |color|
+        category = if FOREGROUND_COLOR_VALUES.include? color
+                     :fg
+                   elsif BACKGROUND_COLOR_VALUES.include? color
+                     :bg
+                   else
+                     color
+                   end
+        categories[category] = color
+      end
+      categories
+    end
 
     # Is this a valid non-compound value? Includes colors but also stuff like :bold and
     # other non-color things.
