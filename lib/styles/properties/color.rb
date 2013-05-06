@@ -9,6 +9,10 @@ module Styles
         return true if value == :none
         colors[value]
       end
+
+      def color_to_use
+        value == :none ? :no_fg_color : value
+      end
     end
   end
 end

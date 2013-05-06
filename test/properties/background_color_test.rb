@@ -7,9 +7,11 @@ class BackgroundColorTest < MiniTest::Unit::TestCase
 
     assert_equal "#{color.on_blue}#{test_line}#{color.reset}", apply(:blue, test_line)
     assert_equal "#{color.on_cyan}#{test_line}#{color.reset}", apply(:cyan, test_line)
+    assert_equal test_line, apply(:none, test_line)
 
     assert_equal "#{color.on_blue}#{test_line}#{color.reset}", process_with_sub_engine(:blue, test_line)
     assert_equal "#{color.on_cyan}#{test_line}#{color.reset}", process_with_sub_engine(:cyan, test_line)
+    assert_equal test_line, process_with_sub_engine(:none, test_line)
   end
 
   def test_works_with_on_prefixed_colors

@@ -29,24 +29,29 @@ module Styles
           end
         end
 
-        line_colors ? "#{colors[line_colors]}#{colored_line}#{colors[:reset]}" : colored_line
+        visible_line_colors = visible_colors(line_colors)
+        visible_line_colors.any? ? "#{colors[visible_line_colors]}#{colored_line}#{colors[:reset]}" : colored_line
       end
 
       private
 
       def get_line_colors(line_properties)
-        line_properties.reject! { |p| !p.valid_value? || p.class::SKIP_VALUES.include?(p.value) }
-        unless line_properties.empty?
-          line_properties.map(&:color_to_use).sort
-        end
+        line_properties.map(&:color_to_use).reject { |c| !colors.valid_value_or_pseudo_value?(c) }.sort
+      end
+
+      # Takes an array of symbols representing colors and returns an array of ones that are
+      # visible, that is: the ones that are not negative values.
+      def visible_colors(mixed_colors)
+        mixed_colors.reject { |c| colors.negative?(c) }.sort
       end
 
       # Apply a match property that has a String selector to the given line. Takes into account
       # line property colors and makes sure the rest of the line has those applied to it.
       def apply_string_match_property(property, line_colors, line)
-        color = [property.value].flatten.first
-        reset = line_colors ? colors[:reset] : '' # Only reset if there are colors to reset
-        line.gsub(property.selector, "#{reset}#{colors[color]}\\0#{colors[:reset]}#{colors[line_colors]}")
+        before_match_colors, after_match_colors = colors.line_substring_color_transitions(
+          line_colors, property.color_to_use
+        )
+        line.gsub(property.selector, "#{before_match_colors}\\0#{after_match_colors}")
       end
 
       def apply_regex_match_property(property, line_colors, line)
@@ -55,8 +60,10 @@ module Styles
           return line unless selector.is_a?(Regexp)
           apply_colors_to_multiple_matches(property, line_colors, line)
         elsif value.is_a? Symbol
-          reset = line_colors ? colors[:reset] : '' # Only reset if there are colors to reset
-          line.gsub(selector) { |match| "#{reset}#{colors[value]}#{match}#{colors[:reset]}#{colors[line_colors]}" }
+          before_match_colors, after_match_colors = colors.line_substring_color_transitions(
+            line_colors, property.color_to_use
+          )
+          line.gsub(selector) { |match| "#{before_match_colors}#{match}#{after_match_colors}" }
         else
           line
         end
@@ -69,12 +76,6 @@ module Styles
       # If there are color that should be applied to the entire line then make sure to turn them
       # off before applying match colors and back on after the match.
       def apply_colors_to_multiple_matches(property, line_colors, line)
-        before_match_codes, after_match_codes = if line_colors && !line_colors.empty?
-          [colors[:reset], colors[:reset] + colors[line_colors]]
-        else
-          ['', colors[:reset]]
-        end
-
         selector, match_colors = property.selector, [property.value].flatten
         match_data = selector.match(line)
         return line unless match_data && (match_data.size > 1)
@@ -91,9 +92,13 @@ module Styles
           match_color = match_colors[orig_match_index]
           next unless match_color
 
+          before_match_colors, after_match_colors = colors.line_substring_color_transitions(
+            line_colors, match_color
+          )
+
           beg_idx, end_idx = offset
-          colored_line.insert(end_idx, after_match_codes)
-          colored_line.insert(beg_idx, "#{before_match_codes}#{colors[match_color]}")
+          colored_line.insert(end_idx, after_match_colors)
+          colored_line.insert(beg_idx, before_match_colors)
         end
 
         colored_line

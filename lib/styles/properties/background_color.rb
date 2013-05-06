@@ -8,6 +8,7 @@ module Styles
 
       # Convert foreground colors to background
       def color_to_use
+        return :no_bg_color if value == :none
         value =~ /^on_/ ? value : "on_#{value}".to_sym
       end
     end

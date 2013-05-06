@@ -74,6 +74,15 @@ module Styles
       end
     end
 
+    # Gives a pair of color codes for transitions into and out of a colored substring in the
+    # middle of a possibly differently colored line.
+    def self.line_substring_color_transitions(line_colors, substring_colors)
+      [
+        color_transition(line_colors, substring_colors, false),
+        color_transition(substring_colors, line_colors)
+      ]
+    end
+
     # Produces a string of color codes to transition from one set of colors to another.
     #
     # If hard is true then all foregound and background colors are reset before adding the after
@@ -145,6 +154,10 @@ module Styles
       transition
     end
 
+    def self.negative?(color)
+      NEGATIVE_PSEUDO_VALUES.include?(color)
+    end
+
     private
 
     def self.categorize(colors)
@@ -190,8 +203,8 @@ module Styles
       VALID_VALUES.include?(color)
     end
 
-    def self.negative?(color)
-      NEGATIVE_PSEUDO_VALUES.include?(color)
+    def self.valid_value_or_pseudo_value?(value)
+      VALID_VALUES_AND_PSEUDO_VALUES.include?(value)
     end
 
     def self.ansi_color
