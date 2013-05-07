@@ -5,11 +5,9 @@ module Styles
 
       # CSS value is line-through and not strikethrough, but include strikethrough as well
       VALUES = [:none, :underline, :line_through, :strikethrough, :blink].freeze
-      SKIP_VALUES = [:none].freeze
 
       def color_to_use
-        # TODO: return multiple values here, negating each style?
-        value == :none ? :no_underline : value
+        value == :none ? :no_text_decoration : value
       end
     end
   end

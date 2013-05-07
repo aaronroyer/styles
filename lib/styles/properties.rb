@@ -1,7 +1,12 @@
 %w[
   base
   display
-  color background_color match_color
-  font_weight text_decoration
-]
-.each { |property| require "styles/properties/#{property}" }
+  color
+  background_color
+  font_weight
+  text_decoration
+  match_color
+  match_background_color
+  match_font_weight
+  match_text_decoration
+].each { |property| require "styles/properties/#{property}" }

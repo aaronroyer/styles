@@ -17,6 +17,8 @@ module Styles
       :on_black, :on_red, :on_green, :on_yellow, :on_blue, :on_magenta, :on_cyan, :on_white
     ].freeze
 
+    TEXT_DECORATION_VALUES = [:underline, :strikethrough, :blink, :line_through].freeze
+
     COLOR_VALUES = (FOREGROUND_COLOR_VALUES + BACKGROUND_COLOR_VALUES).freeze
     OTHER_STYLE_VALUES = [:bold, :italic, :underline, :underscore, :blink, :strikethrough]
 
@@ -24,8 +26,7 @@ module Styles
     # fine-grained negative codes to just remove foreground color or just remove bold. Our API
     # should provide these to allow these kind of fine-grained transitions to other color states.
     NEGATIVE_PSEUDO_VALUES = [
-      :no_fg_color, :no_bg_color, :no_bold, :no_italic, :no_underline,
-      :no_underscore, :no_blink, :no_strikethrough
+      :no_fg_color, :no_bg_color, :no_bold, :no_italic, :no_text_decoration
     ].freeze
 
     VALID_VALUES = (::Term::ANSIColor.attributes + [:none] + CSS_TO_ANSI_VALUES.keys).freeze
@@ -190,6 +191,8 @@ module Styles
         :fg_color
       elsif BACKGROUND_COLOR_VALUES.include?(color) || color == :no_bg_color
         :bg_color
+      elsif TEXT_DECORATION_VALUES.include?(color) || color == :no_text_decoration
+        :text_decoration
       else
         color.to_s.sub(/^no_/, '').to_sym
       end
@@ -204,6 +207,8 @@ module Styles
         :no_fg_color
       elsif BACKGROUND_COLOR_VALUES.include?(color)
         :no_bg_color
+      elsif TEXT_DECORATION_VALUES.include?(color)
+        :no_text_decoration
       else
         color.to_s.prepend('no_').to_sym
       end

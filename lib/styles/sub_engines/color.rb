@@ -18,31 +18,22 @@ module Styles
 
         colored_line = line.dup.chomp
 
-        colored_line = match_properties.inject(colored_line) do |updated_line, prop|
+        match_properties.each do |prop|
+          next unless prop.valid_value?
           if prop.selector.is_a? String
-            apply_string_match_property(prop, line_colors, updated_line)
+            colored_line = apply_string_match_property(prop, line_colors, colored_line)
           elsif prop.selector.is_a? Regexp
-            apply_regex_match_property(prop, line_colors, updated_line)
-          else
-            # No support for Symbol selectors
-            colored_line
+            colored_line = apply_regex_match_property(prop, line_colors, colored_line)
           end
         end
 
-        visible_line_colors = visible_colors(line_colors)
-        visible_line_colors.any? ? "#{colors[visible_line_colors]}#{colored_line}#{colors[:reset]}" : colored_line
+        line_colors.any? ? "#{colors[line_colors]}#{colored_line}#{colors[:reset]}" : colored_line
       end
 
       private
 
       def get_line_colors(line_properties)
-        line_properties.map(&:color_to_use).reject { |c| !colors.valid_value_or_pseudo_value?(c) }.sort
-      end
-
-      # Takes an array of symbols representing colors and returns an array of ones that are
-      # visible, that is: the ones that are not negative values.
-      def visible_colors(mixed_colors)
-        mixed_colors.reject { |c| colors.negative?(c) }.sort
+        line_properties.map(&:color_to_use).reject { |c| !colors.valid?(c) }.sort
       end
 
       # Apply a match property that has a String selector to the given line. Takes into account

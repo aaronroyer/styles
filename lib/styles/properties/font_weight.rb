@@ -4,7 +4,6 @@ module Styles
       sub_engine :color
 
       VALUES = [:normal, :bold].freeze
-      SKIP_VALUES = [:normal].freeze
 
       def color_to_use
         value == :normal ? :no_bold : value

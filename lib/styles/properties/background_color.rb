@@ -4,7 +4,6 @@ module Styles
       sub_engine :color
 
       VALUES = (Styles::Colors::COLOR_VALUES + [:none]).freeze
-      SKIP_VALUES = [:none].freeze
 
       # Convert foreground colors to background
       def color_to_use

@@ -16,6 +16,14 @@ class MatchColorTest < MiniTest::Unit::TestCase
       process_with_sub_engine(:blue, 'this is', test_line)
   end
 
+  def test_invalid_values_are_ignored
+    test_line = 'this is a test line'
+    assert_equal 'this is a test line', process_with_sub_engine(:invalid, 'test', test_line)
+    assert_equal 'this is a test line', process_with_sub_engine(:invalid, /test/, test_line)
+    assert_equal 'this is a test line', process_with_sub_engine(:invalid, /(test)/, test_line)
+    assert_equal 'this is a test line', process_with_sub_engine([:invalid, :bogus], /(test) (line)/, test_line)
+  end
+
   def test_applies_correct_colors_to_multiple_string_selector_matches
     assert_equal "#{color.green}the#{color.reset} word #{color.green}the#{color.reset} is repeated",
       apply(:green, 'the', 'the word the is repeated')
