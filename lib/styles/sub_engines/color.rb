@@ -76,7 +76,7 @@ module Styles
       # If there are color that should be applied to the entire line then make sure to turn them
       # off before applying match colors and back on after the match.
       def apply_colors_to_multiple_matches(property, line_colors, line)
-        selector, match_colors = property.selector, [property.value].flatten
+        selector, match_colors = property.selector, [property.color_to_use].flatten
         match_data = selector.match(line)
         return line unless match_data && (match_data.size > 1)
         colored_line = line.dup

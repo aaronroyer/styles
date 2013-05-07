@@ -107,6 +107,8 @@ class ColorsTest < MiniTest::Unit::TestCase
     assert_equal ansi.blue, c.color_transition(:no_fg_color, :blue)
     assert_equal ansi.on_red, c.color_transition(:no_bg_color, :on_red)
     assert_equal '', c.color_transition([:blue, :no_bg_color], :blue)
+    assert_equal ansi.on_blue, c.color_transition(:no_fg_color, :on_blue)
+    assert_equal '', c.color_transition([:no_fg_color, :on_blue], :on_blue)
 
 
     assert_equal ansi.reset, c.color_transition(:blue, :no_fg_color, false)
@@ -123,6 +125,8 @@ class ColorsTest < MiniTest::Unit::TestCase
     assert_equal ansi.blue, c.color_transition(:no_fg_color, :blue, false)
     assert_equal ansi.on_red, c.color_transition(:no_bg_color, :on_red, false)
     assert_equal '', c.color_transition([:blue, :no_bg_color], :blue, false)
+    assert_equal ansi.on_blue, c.color_transition(:no_fg_color, :on_blue, false)
+    assert_equal '', c.color_transition([:no_fg_color, :on_blue], :on_blue, false)
   end
 
   private

@@ -81,9 +81,18 @@ module Styles
     # Gives a pair of color codes for transitions into and out of a colored substring in the
     # middle of a possibly differently colored line.
     def self.line_substring_color_transitions(line_colors, substring_colors)
+      line_colors, substring_colors = Array(line_colors), Array(substring_colors)
+
+      implied_substring_colors = []
+      line_colors.each do |line_col|
+        cat = category(line_col)
+        replaced = substring_colors.any? { |substr_col| category(substr_col) == cat}
+        implied_substring_colors << line_col unless replaced
+      end
+
       [
         color_transition(line_colors, substring_colors, false),
-        color_transition(substring_colors, line_colors)
+        color_transition(substring_colors + implied_substring_colors, line_colors)
       ]
     end
 
@@ -102,8 +111,7 @@ module Styles
     # category (foreground, background, underline, etc.) then there will never be an explicit
     # reset because that would be redundant and merely add more characters.
     def self.color_transition(before_colors, after_colors, hard=true)
-      before_colors = [before_colors] unless before_colors.is_a?(Array)
-      after_colors = [after_colors] unless after_colors.is_a?(Array)
+      before_colors, after_colors = Array(before_colors), Array(after_colors)
 
       before_categories, after_categories = categorize(before_colors), categorize(after_colors)
 
@@ -115,7 +123,7 @@ module Styles
       colors_to_apply = []
 
       # Explicit reset is necessary if we want a hard transition and all colors in all
-        # categories are not replaced.
+      # categories are not replaced.
       if hard
         before_categories.each_pair do |cat, before_color|
           next if negative?(before_color)

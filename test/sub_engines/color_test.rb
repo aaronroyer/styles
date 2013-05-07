@@ -69,11 +69,15 @@ class ColorSubEngineTest < MiniTest::Unit::TestCase
     test_line = 'this line has the number 12 in it'
     color_prop = ::Styles::Properties::Color.new(:blue, 'line')
     regex_match_color_prop = ::Styles::Properties::MatchColor.new([:green, :red], /(number) (\d\d)/)
+    regex_match_color_prop_with_none = ::Styles::Properties::MatchColor.new([:green, :none], /(number) (\d\d)/)
     sub_engine = ::Styles::SubEngines::Color.new
 
     assert_equal "#{color.blue}this line has the #{color.green}number#{color.blue}" +
       " #{color.red}12#{color.blue} in it#{color.reset}",
       sub_engine.process([color_prop, regex_match_color_prop], test_line)
+    assert_equal "#{color.blue}this line has the #{color.green}number#{color.blue}" +
+      " #{color.reset}12#{color.blue} in it#{color.reset}",
+      sub_engine.process([color_prop, regex_match_color_prop_with_none], test_line)
   end
 
   def test_background_colors_for_line_applies_to_matches_if_no_background_color_of_their_own
@@ -81,12 +85,21 @@ class ColorSubEngineTest < MiniTest::Unit::TestCase
     bg_color_prop = ::Styles::Properties::BackgroundColor.new(:blue, 'word')
     string_match_color_prop = ::Styles::Properties::MatchColor.new(:green, 'word')
     regex_match_color_prop = ::Styles::Properties::MatchColor.new(:green, /word/)
+    regex_groups_match_color_prop = ::Styles::Properties::MatchColor.new([:green, :red], /(certain) (word)/)
+    regex_groups_match_color_prop_with_none = ::Styles::Properties::MatchColor.new([:green, :none], /(certain) (word)/)
     sub_engine = ::Styles::SubEngines::Color.new
 
     assert_equal "#{color.on_blue}this line has a certain #{color.green}word#{color.reset}#{color.on_blue} in it#{color.reset}",
       sub_engine.process([bg_color_prop, string_match_color_prop], test_line)
     assert_equal "#{color.on_blue}this line has a certain #{color.green}word#{color.reset}#{color.on_blue} in it#{color.reset}",
       sub_engine.process([bg_color_prop, regex_match_color_prop], test_line)
+
+    assert_equal "#{color.on_blue}this line has a #{color.green}certain#{color.reset}#{color.on_blue}" +
+      " #{color.red}word#{color.reset}#{color.on_blue} in it#{color.reset}",
+      sub_engine.process([bg_color_prop, regex_groups_match_color_prop], test_line)
+    assert_equal "#{color.on_blue}this line has a #{color.green}certain#{color.reset}#{color.on_blue}" +
+      " word in it#{color.reset}",
+      sub_engine.process([bg_color_prop, regex_groups_match_color_prop_with_none], test_line)
   end
 
   private

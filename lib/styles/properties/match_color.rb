@@ -6,11 +6,15 @@ module Styles
       COLOR_PROPERTY_TYPE = :match
 
       def valid_value?
-        [value].flatten.all? { |a_color| colors.is_basic_color?(a_color) }
+        [value].flatten.all? { |color| colors.is_basic_color?(color) || color == :none }
       end
 
       def color_to_use
-        value == :none ? :no_fg_color : value
+        if value.is_a? Array
+          value.map { |color| color == :none ? :no_fg_color : color }
+        elsif value.is_a? Symbol
+          value == :none ? :no_fg_color : value
+        end
       end
     end
   end

@@ -72,6 +72,19 @@ class MatchColorTest < MiniTest::Unit::TestCase
       process_with_sub_engine([:green, :red], /(one)[\s\w]+(two)[\s\w]+three/, 'numbers one and two and three')
   end
 
+  def test_can_specify_no_color_for_match
+    assert_equal 'no color here', process_with_sub_engine(:none, 'color', 'no color here')
+    assert_equal 'no color here', process_with_sub_engine(:none, /color/, 'no color here')
+  end
+
+  def test_can_specify_no_color_for_match_groups
+    assert_equal 'no color here', process_with_sub_engine([:none], /(color)/, 'no color here')
+    assert_equal "the first and #{color.red}second#{color.reset} matches",
+      process_with_sub_engine([:none, :red], /(first)[\s\w]+(second)/, 'the first and second matches')
+    assert_equal "the #{color.red}first#{color.reset} and second matches",
+      process_with_sub_engine([:red, :none], /(first)[\s\w]+(second)/, 'the first and second matches')
+  end
+
   private
 
   def apply(value, selector, line)
