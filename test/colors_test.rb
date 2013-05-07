@@ -12,7 +12,7 @@ class ColorsTest < MiniTest::Unit::TestCase
   end
 
   def test_can_access_compound_colors_with_brackets
-    assert_equal ansi.red + ansi.on_white, c[:red_on_white]
+    assert_equal ansi.on_white + ansi.red , c[:red_on_white]
     assert_equal ansi.blue + ansi.on_blue, c[:blue_on_blue]
 
     assert_nil c[:red_on_bogus]
@@ -22,14 +22,14 @@ class ColorsTest < MiniTest::Unit::TestCase
 
   def test_can_access_multiple_colors_with_brackets
     assert_equal ansi.red + ansi.white, c[:red, :white]
-    assert_equal ansi.red + ansi.white + ansi.blue, c[:red, :white, :blue]
-    assert_equal ansi.red + ansi.white + ansi.on_blue, c[:red, :white_on_blue]
+    assert_equal ansi.blue + ansi.red + ansi.white, c[:red, :white, :blue]
+    assert_equal ansi.on_blue + ansi.red + ansi.white, c[:red, :white_on_blue]
   end
 
   def test_can_use_arrays_of_colors_with_brackets
     assert_equal ansi.red + ansi.white, c[[:red, :white]]
-    assert_equal ansi.red + ansi.white + ansi.blue, c[[:red, :white, :blue]]
-    assert_equal ansi.red + ansi.white + ansi.on_blue, c[[:red, :white_on_blue]]
+    assert_equal ansi.blue + ansi.red + ansi.white, c[[:red, :white, :blue]]
+    assert_equal ansi.on_blue + ansi.red + ansi.white, c[[:red, :white_on_blue]]
   end
 
   def test_maps_certain_css_values_to_ansi

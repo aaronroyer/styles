@@ -47,6 +47,10 @@ module Styles
       end
 
       unless valid_colors.empty?
+        valid_colors.uniq!
+        valid_colors.sort!
+        valid_colors.unshift(:reset) if valid_colors.delete(:reset)
+
         valid_colors.inject('') { |str, color| str += ansi_color.send(color) }
       end
     end

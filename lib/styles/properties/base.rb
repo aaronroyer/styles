@@ -22,8 +22,7 @@ module Styles
         raise NotImplementedError, "apply method needs to be implemented for class: #{self.class.name}"
       end
 
-      # Add PreprocessorMacros and add a method to each subclass to scan the constants for valid
-      # values or arrays of values
+      # Add a method to each subclass to scan the constants for valid values or arrays of values
       def self.inherited(subclass)
         subclass.class_eval do
           def self.valid_values
