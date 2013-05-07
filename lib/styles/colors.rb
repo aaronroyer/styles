@@ -17,7 +17,7 @@ module Styles
       :on_black, :on_red, :on_green, :on_yellow, :on_blue, :on_magenta, :on_cyan, :on_white
     ].freeze
 
-    TEXT_DECORATION_VALUES = [:underline, :strikethrough, :blink, :line_through].freeze
+    TEXT_DECORATION_VALUES = [:underline, :strikethrough, :blink].freeze
 
     COLOR_VALUES = (FOREGROUND_COLOR_VALUES + BACKGROUND_COLOR_VALUES).freeze
     OTHER_STYLE_VALUES = [:bold, :italic, :underline, :underscore, :blink, :strikethrough]
@@ -26,7 +26,8 @@ module Styles
     # fine-grained negative codes to just remove foreground color or just remove bold. Our API
     # should provide these to allow these kind of fine-grained transitions to other color states.
     NEGATIVE_PSEUDO_VALUES = [
-      :no_fg_color, :no_bg_color, :no_bold, :no_italic, :no_text_decoration
+      :no_fg_color, :no_bg_color, :no_bold, :no_italic, :no_text_decoration,
+      :no_underline, :no_blink, :no_strikethrough
     ].freeze
 
     VALID_VALUES = (::Term::ANSIColor.attributes + [:none] + CSS_TO_ANSI_VALUES.keys).freeze
@@ -139,10 +140,13 @@ module Styles
       # If soft transition then the only time we need an explicit reset is when we have a color
       # in a category that is explicitly turned off with a negative value. This also applies
       # to hard transitions.
-      after_categories.each_pair do |cat, after_color|
-        before_color = before_categories[cat]
-        if before_color && negative?(after_color) && !negative?(before_color)
-          should_reset = true
+      unless should_reset
+        after_categories.each_pair do |cat, after_color|
+          before_color = before_categories[cat]
+          if before_color && negative?(after_color) && !negative?(before_color)
+            should_reset = true
+            break
+          end
         end
       end
 
@@ -173,9 +177,36 @@ module Styles
 
     private
 
+    # Exists to support color_transition - it's a bit specialized. Takes an array of colors and
+    # puts them in a hash, category => value. The extra things that this does is
+    #   1. translates the no_text_decoration negative pseudo-value into all of the negative values
+    #      in the text_decoration category
+    #   2. if there is any text_decoration category value then it adds negations for the other
+    #      text_decoration values - this is because even though they don't replace each other in
+    #      terminals (for example: adding blink doesn't turn off existing underline) but we want
+    #      them to in order to match CSS-style behavior so we need to add this in
+    #
+    # TODO: refactor this text_decoration stuff and probably move it elsewhere so it makes more
+    #       sense - it could be cleaner and this probably isn't the place for it
     def self.categorize(colors)
       categories = {}
+
+      if categories.delete(:no_text_decoration)
+        TEXT_DECORATION_VALUES.each do |td|
+          categories[td] = negate(td)
+        end
+      end
+
       colors.each { |color| categories[category(color)] = color }
+
+      TEXT_DECORATION_VALUES.each do |td|
+        if categories.values.include?(td)
+          (TEXT_DECORATION_VALUES - [td]).each do |other_td|
+            categories[other_td] = negate(other_td) unless categories.values.include?(other_td)
+          end
+        end
+      end
+
       categories
     end
 
@@ -191,8 +222,6 @@ module Styles
         :fg_color
       elsif BACKGROUND_COLOR_VALUES.include?(color) || color == :no_bg_color
         :bg_color
-      elsif TEXT_DECORATION_VALUES.include?(color) || color == :no_text_decoration
-        :text_decoration
       else
         color.to_s.sub(/^no_/, '').to_sym
       end
@@ -207,8 +236,6 @@ module Styles
         :no_fg_color
       elsif BACKGROUND_COLOR_VALUES.include?(color)
         :no_bg_color
-      elsif TEXT_DECORATION_VALUES.include?(color)
-        :no_text_decoration
       else
         color.to_s.prepend('no_').to_sym
       end

@@ -7,7 +7,13 @@ module Styles
       VALUES = [:none, :underline, :line_through, :strikethrough, :blink].freeze
 
       def color_to_use
-        value == :none ? :no_text_decoration : value
+        if value == :line_through
+          :strikethrough
+        elsif value == :none
+          :no_text_decoration
+        else
+          value
+        end
       end
     end
   end

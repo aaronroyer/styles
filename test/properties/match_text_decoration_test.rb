@@ -8,6 +8,7 @@ class MatchTextDecorationTest < MiniTest::Unit::TestCase
     assert_equal "this is a #{color.underline}test#{color.reset} line", process(:underline, 'test', test_line)
     assert_equal "this is a #{color.strikethrough}test#{color.reset} line", process(:strikethrough, 'test', test_line)
     assert_equal "this is a #{color.strikethrough}test#{color.reset} line", process(:line_through, 'test', test_line)
+    assert_equal "this is a #{color.blink}test#{color.reset} line", process(:blink, 'test', test_line)
     assert_equal "this is a #{color.underline}test#{color.reset} line", process(:underline, /test/, test_line)
     assert_equal "this is a #{color.underline}test#{color.reset} line", process(:underline, /(test)/, test_line)
     assert_equal test_line, process(:none, 'test', test_line)

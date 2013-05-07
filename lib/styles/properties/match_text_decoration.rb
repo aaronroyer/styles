@@ -14,9 +14,21 @@ module Styles
 
       def color_to_use
         if value.is_a? Array
-          value.map { |decoration| decoration == :none ? :no_text_decoration : decoration }
+          value.map { |decoration| normalize_value decoration }
         elsif value.is_a? Symbol
-          value == :none ? :no_text_decoration : value
+          normalize_value value
+        end
+      end
+
+      private
+
+      def normalize_value(value)
+        if value == :line_through
+          :strikethrough
+        elsif value == :none
+          :no_text_decoration
+        else
+          value
         end
       end
     end

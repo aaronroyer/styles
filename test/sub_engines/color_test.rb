@@ -75,6 +75,16 @@ class ColorSubEngineTest < MiniTest::Unit::TestCase
       process([color_prop, regex_match_color_prop_with_none], test_line)
   end
 
+  def test_can_combine_misc_line_and_match_properties
+    test_line = 'this line has the number 12 in it'
+    underline_prop = ::Styles::Properties::TextDecoration.new(:underline, 'number')
+    blink_match_prop = ::Styles::Properties::MatchTextDecoration.new(:blink, 'number')
+
+    assert_equal "#{color.underline}this line has the #{color.reset}#{color.blink}number#{color.reset}" +
+      "#{color.underline} 12 in it#{color.reset}",
+      process([underline_prop, blink_match_prop], test_line)
+  end
+
   def test_background_colors_for_line_applies_to_matches_if_no_background_color_of_their_own
     test_line = 'this line has a certain word in it'
     bg_color_prop = ::Styles::Properties::BackgroundColor.new(:blue, 'word')
