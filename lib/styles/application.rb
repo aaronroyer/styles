@@ -58,9 +58,12 @@ module Styles
         file = stylesheet_file(name)
         begin
           stylesheets << ::Styles::Stylesheet.from_string(IO.read(file))
+        rescue Errno::ENOENT => e
+          $stderr.puts "Stylesheet '#{name}.rb' does not exist in #{stylesheets_dir}"
+          exit 1
         rescue SyntaxError => se
           $stderr.puts "Could not parse stylesheet: #{file}"
-          $stderr.puts se.message.sub(/\(eval\):/, 'line ')
+          $stderr.puts se.message.sub(/^\(eval\):/, 'line ')
           exit 1
         end
       end
