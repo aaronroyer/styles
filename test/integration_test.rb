@@ -116,6 +116,17 @@ the #{color.red}number#{color.reset} #{color.green}25#{color.reset} is here
     assert_correct_output
   end
 
+  def test_malformed_stylesheet_raises_syntax_error
+    bad_stylesheet = <<-BAD_STYLESHEET
+      'wat' - {
+        color:
+    BAD_STYLESHEET
+
+    assert_raises(SyntaxError) do
+      Styles::Stylesheet.from_string bad_stylesheet
+    end
+  end
+
   private
 
   def assert_correct_output

@@ -55,7 +55,14 @@ module Styles
       stylesheet_names = ARGV.dup
       stylesheet_names << 'default' if stylesheet_names.empty?
       stylesheet_names.each do |name|
-        stylesheets << ::Styles::Stylesheet.from_string(IO.read(stylesheet_file(name)))
+        file = stylesheet_file(name)
+        begin
+          stylesheets << ::Styles::Stylesheet.from_string(IO.read(file))
+        rescue SyntaxError => se
+          $stderr.puts "Could not parse stylesheet: #{file}"
+          $stderr.puts se.message.sub(/\(eval\):/, 'line ')
+          exit 1
+        end
       end
     end
 
