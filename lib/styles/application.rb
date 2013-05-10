@@ -31,6 +31,10 @@ module Styles
       @stylesheets ||= []
     end
 
+    def stylesheet_names
+      @stylesheet_names ||= []
+    end
+
     def parse_args
       OptionParser.new do |opts|
         opts.on('--edit [NAME]', 'Edit stylesheet with given NAME (\'default\' by default)') do |name|
@@ -49,15 +53,15 @@ module Styles
           exit
         end
       end.parse!
+
+      stylesheet_names = ARGV.dup
     end
 
     def read_stylesheets
-      stylesheet_names = ARGV.dup
-      stylesheet_names << 'default' if stylesheet_names.empty?
-      stylesheet_names.each do |name|
+      (stylesheet_names.empty? ? ['default'] : stylesheet_names).each do |name|
         file = stylesheet_file(name)
         begin
-          stylesheets << ::Styles::Stylesheet.from_string(IO.read(file))
+          stylesheets << ::Styles::Stylesheet.new(file)
         rescue Errno::ENOENT => e
           $stderr.puts "Stylesheet '#{name}.rb' does not exist in #{stylesheets_dir}"
           exit 1
