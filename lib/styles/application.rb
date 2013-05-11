@@ -3,6 +3,13 @@ require 'pathname'
 
 module Styles
   class Application
+    STYLESHEET_CHECK_INTERVAL_SECONDS = 2
+
+    def initialize(options={})
+      @input_stream = options[:input_stream] || $stdin
+      @output_stream = options[:output_stream] || $stdout
+    end
+
     def run
       create_stylesheets_dir
       parse_args
@@ -12,15 +19,25 @@ module Styles
 
     private
 
-    def process
-      input_stream, output_stream = $stdin, $stdout
+    attr_accessor :last_stylesheet_check_time
+    attr_reader :input_stream, :output_stream
 
+    def process
       ['INT', 'TERM'].each { |signal| trap(signal) { exit } }
 
-      while line = input_stream.gets
-        result = engine.process(line)
-        output_stream.puts result if result
+      while process_next_line
+        # no-op
       end
+    end
+
+    def process_next_line
+      reload_stylesheets_if_outdated if check_interval_elapsed?
+
+      line = input_stream.gets
+      return nil unless line
+      result = engine.process line
+      output_stream.puts result if result
+      line
     end
 
     def engine
@@ -54,14 +71,17 @@ module Styles
         end
       end.parse!
 
-      stylesheet_names = ARGV.dup
+      stylesheet_names.concat ARGV.dup
     end
 
     def read_stylesheets
-      (stylesheet_names.empty? ? ['default'] : stylesheet_names).each do |name|
+      stylesheet_names << 'default' if stylesheet_names.empty?
+
+      stylesheet_names.each do |name|
         file = stylesheet_file(name)
         begin
           stylesheets << ::Styles::Stylesheet.new(file)
+          self.last_stylesheet_check_time = Time.now
         rescue Errno::ENOENT => e
           $stderr.puts "Stylesheet '#{name}.rb' does not exist in #{stylesheets_dir}"
           exit 1
@@ -71,6 +91,15 @@ module Styles
           exit 1
         end
       end
+    end
+
+    def reload_stylesheets_if_outdated
+      stylesheets.each &:reload_if_outdated
+      self.last_stylesheet_check_time = Time.now
+    end
+
+    def check_interval_elapsed?
+      (last_stylesheet_check_time + STYLESHEET_CHECK_INTERVAL_SECONDS) <= Time.now
     end
 
     def which_editor

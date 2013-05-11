@@ -31,7 +31,7 @@ module Styles
     end
 
     def outdated?
-      file_mtime > last_eval_time
+      !last_eval_time || file_mtime > last_eval_time
     end
 
     def reload_if_outdated

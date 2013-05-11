@@ -45,7 +45,7 @@ module Styles
     private
 
     def rules
-      @rules ||= stylesheets.map(&:rules).flatten
+      stylesheets.map(&:rules).flatten
     end
 
     def color
