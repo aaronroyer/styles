@@ -2,6 +2,7 @@ module Styles
   class Stylesheet
 
     attr_accessor :file_path
+    attr_reader :last_updated
 
     # For creating a one off, temporary Stylesheet without an associated file. Mostly useful
     # for testing.
@@ -13,12 +14,16 @@ module Styles
 
     def initialize(stylesheet_file_path=nil)
       @file_path = stylesheet_file_path
-      @last_eval_time = nil
+      @last_updated = nil
       load_rules_from_file if @file_path
     end
 
     def rules
       @rules ||= []
+    end
+
+    def unrecognized_property_names
+      rules.map { |rule| rule.unrecognized_properties.keys }.flatten
     end
 
     # Create a new Rule with the given selector and properties and add it to this Stylesheet.
@@ -31,7 +36,7 @@ module Styles
     end
 
     def outdated?
-      !last_eval_time || file_mtime > last_eval_time
+      !last_updated || file_mtime > last_updated
     end
 
     def reload_if_outdated
@@ -40,7 +45,7 @@ module Styles
 
     private
 
-    attr_accessor :last_eval_time
+    attr_writer :last_updated
 
     def file_mtime
       File.mtime file_path
@@ -49,7 +54,7 @@ module Styles
     def load_rules_from_file
       rules.clear
       self.class.eval_rules(IO.read(file_path), self)
-      self.last_eval_time = Time.now
+      self.last_updated = Time.now
     end
 
     # Evaluates rules specified in the DSL format, creates Rule objects from them, and adds them

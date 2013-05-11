@@ -166,6 +166,21 @@ class StylesheetTest < MiniTest::Unit::TestCase
     assert_equal 2, sheet.rules.size
   end
 
+  def test_unrecognized_property_names
+    stylesheet_text = <<-STYLESHEET
+      'good' - {
+        color: green,
+        bogus: value,
+        match_color: yellow
+      }
+      'other' - { display: none }
+    STYLESHEET
+
+    sheet = Styles::Stylesheet.from_string(stylesheet_text)
+    assert_equal 2, sheet.rules.size
+    assert_equal [:bogus], sheet.unrecognized_property_names
+  end
+
   private
 
   def tmp_stylesheet_files

@@ -11,17 +11,18 @@ module Styles
       all: /^/ # Synonym of :any
     }
 
-    attr_accessor :selector, :properties
+    attr_accessor :selector, :properties, :unrecognized_properties
 
     def initialize(selector, properties_hash)
-      @selector, @properties_hash = selector, properties_hash
+      @selector = selector
+      @unrecognized_properties = {}
 
-      @properties = @properties_hash.keys.map do |name|
+      @properties = properties_hash.keys.map do |name|
         property_class = find_property_class(name)
         if property_class
-          property_class.new(@properties_hash[name], selector)
+          property_class.new(properties_hash[name], selector)
         else
-          $stderr.puts "Invalid property: #{name}"
+          unrecognized_properties[name] = properties_hash[name]
           nil
         end
       end.compact
@@ -61,7 +62,11 @@ module Styles
 
     def find_property_class(property_name)
       class_name = property_name.to_s.split('_').map(&:capitalize).join
-      ::Styles::Properties.const_get(class_name)
+      begin
+        ::Styles::Properties.const_get(class_name)
+      rescue NameError
+        nil
+      end
     end
 
     def color

@@ -22,6 +22,15 @@ class RuleTest < MiniTest::Unit::TestCase
     assert regex_rule.applicable?(line), 'regex selector does not match against color code'
   end
 
+  def test_unrecognized_properties_are_collected
+    properties = { color: :red, display: :none, bogus: :value }
+    rule = Styles::Rule.new('test', properties)
+
+    assert_equal 2, rule.properties.size
+    assert_equal 1, rule.unrecognized_properties.keys.size
+    assert_equal :value, rule.unrecognized_properties[:bogus]
+  end
+
   private
 
   def color
