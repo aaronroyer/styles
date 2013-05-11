@@ -47,6 +47,21 @@ class StylesheetTest < MiniTest::Unit::TestCase
     assert_equal :none, blank_prop.value
   end
 
+  def test_raises_stylesheet_load_error_when_loading_fails
+    bad_stylesheet_text = <<-STYLESHEET
+      'ugh' - {
+        color: green
+    STYLESHEET
+
+    assert_raises(::Styles::StylesheetLoadError) do
+      Styles::Stylesheet.from_string bad_stylesheet_text
+    end
+
+    assert_raises(::Styles::StylesheetLoadError) do
+      Styles::Stylesheet.new('somebogusfilenamethatdoesnotexistanywhere.rb')
+    end
+  end
+
   def test_can_create_a_stylesheet_from_a_file
     stylesheet_text = <<-STYLESHEET
       'good' - {
@@ -179,6 +194,38 @@ class StylesheetTest < MiniTest::Unit::TestCase
     sheet = Styles::Stylesheet.from_string(stylesheet_text)
     assert_equal 2, sheet.rules.size
     assert_equal [:bogus], sheet.unrecognized_property_names
+  end
+
+  def test_old_rules_are_retained_when_reload_crashes
+    stylesheet_text = <<-STYLESHEET
+      'good' - {
+        color: green,
+        font_weight: bold
+      }
+
+      /bad/ - {
+       color: red
+      }
+    STYLESHEET
+
+    file = tmp_stylesheet_file(stylesheet_text)
+    sheet = Styles::Stylesheet.new(file.path)
+    assert_equal 2, sheet.rules.size
+    assert sheet.rules.find { |rule| rule.selector == 'good' }
+    assert sheet.rules.find { |rule| rule.selector == /bad/ }
+
+    new_stylesheet_text = <<-NEW_STYLESHEET
+      'wat' - {
+        display: none
+    NEW_STYLESHEET
+
+    File.open(file.path, 'w') { |f| f.write new_stylesheet_text }
+
+    assert_raises(::Styles::StylesheetLoadError) { sheet.reload }
+
+    assert_equal 2, sheet.rules.size
+    assert sheet.rules.find { |rule| rule.selector == 'good' }
+    assert sheet.rules.find { |rule| rule.selector == /bad/ }
   end
 
   private

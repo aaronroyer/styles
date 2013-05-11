@@ -9,6 +9,7 @@ module Styles
       @input_stream = options[:input_stream] || $stdin
       @output_stream = options[:output_stream] || $stdout
       @quiet = false
+      @last_reload_error_message = nil
     end
 
     def run
@@ -87,12 +88,8 @@ module Styles
           stylesheets << ::Styles::Stylesheet.new(file)
           self.last_stylesheet_check_time = Time.now
           print_stylesheet_warnings
-        rescue Errno::ENOENT => e
-          $stderr.puts "Stylesheet '#{name}.rb' does not exist in #{stylesheets_dir}"
-          exit 1
-        rescue SyntaxError => se
-          $stderr.puts "Could not parse stylesheet: #{file}"
-          $stderr.puts se.message.sub(/^\(eval\):/, 'line ')
+        rescue ::Styles::StylesheetLoadError => e
+          $stderr.puts e.message
           exit 1
         end
       end
@@ -100,9 +97,23 @@ module Styles
 
     def reload_stylesheets_if_outdated
       before_times = stylesheets.map(&:last_updated).sort
-      stylesheets.each &:reload_if_outdated
-      after_times = stylesheets.map(&:last_updated).sort
+
+      begin
+        stylesheets.each &:reload_if_outdated
+        @last_reload_error_message = nil
+      rescue ::Styles::StylesheetLoadError => e
+        unless @last_reload_error_message == e.message
+          $stderr.puts e.message
+          @last_reload_error_message = e.message
+
+          $stderr.puts "\nFix the above errors to have output formatted correctly\n" +
+            "Proceeding with previously working stylesheet rules in 5 seconds..."
+          sleep 5
+        end
+      end
       self.last_stylesheet_check_time = Time.now
+
+      after_times = stylesheets.map(&:last_updated).sort
       print_stylesheet_warnings unless before_times == after_times
     end
 
@@ -170,7 +181,7 @@ module Styles
           unless sheet.unrecognized_property_names.empty?
             props = sheet.unrecognized_property_names
             name_list = props.map { |p| "'#{p.to_s}'" }.join(' ')
-            $stderr.puts "Unrecognized #{props.size > 1 ? 'properties' : 'property'} #{name_list} in #{sheet.file_path}"
+            $stderr.puts "(styles) Warning: unrecognized #{props.size > 1 ? 'properties' : 'property'} #{name_list} in #{sheet.file_path}"
           end
         end
       end

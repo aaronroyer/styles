@@ -1,3 +1,11 @@
+module Styles
+
+  # Raised when a stylesheet cannot be loaded, either because it does not
+  # exist or because it is malformed.
+  class StylesheetLoadError < LoadError
+  end
+end
+
 require 'styles/version'
 require 'styles/core_ext'
 require 'styles/colors'
