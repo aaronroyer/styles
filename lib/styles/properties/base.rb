@@ -22,25 +22,6 @@ module Styles
         raise NotImplementedError, "apply method needs to be implemented for class: #{self.class.name}"
       end
 
-      # Add a method to each subclass to scan the constants for valid values or arrays of values
-      def self.inherited(subclass)
-        subclass.class_eval do
-          def self.valid_values
-            values = []
-            constants.each do |constant|
-              next unless constant.to_s.downcase.include?('value')
-              value_or_values = const_get constant
-              if value_or_values.is_a? Array
-                values += value_or_values
-              else
-                values << value_or_values
-              end
-            end
-            values
-          end
-        end
-      end
-
       def colors
         ::Styles::Colors
       end
