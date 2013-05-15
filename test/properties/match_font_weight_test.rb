@@ -24,7 +24,8 @@ class MatchFontWeightTest < MiniTest::Unit::TestCase
 
   def process(value, selector, line)
     sub_engine = ::Styles::SubEngines::Color.new
-    sub_engine.process [::Styles::Properties::MatchFontWeight.new(value, selector)], line
+    line = ::Styles::Line.new(line, [::Styles::Properties::MatchFontWeight.new(value, selector)])
+    sub_engine.process(line).to_s
   end
 
   def color

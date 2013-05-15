@@ -9,6 +9,7 @@ end
 require 'styles/version'
 require 'styles/core_ext'
 require 'styles/colors'
+require 'styles/line'
 require 'styles/engine'
 require 'styles/sub_engines'
 require 'styles/properties'

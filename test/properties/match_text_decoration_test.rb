@@ -28,7 +28,8 @@ class MatchTextDecorationTest < MiniTest::Unit::TestCase
 
   def process(value, selector, line)
     sub_engine = ::Styles::SubEngines::Color.new
-    sub_engine.process [::Styles::Properties::MatchTextDecoration.new(value, selector)], line
+    line = ::Styles::Line.new(line, [::Styles::Properties::MatchTextDecoration.new(value, selector)])
+    sub_engine.process(line).to_s
   end
 
   def color

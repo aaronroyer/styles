@@ -61,7 +61,8 @@ class MatchBackgroundColorTest < MiniTest::Unit::TestCase
 
   def process(value, selector, line)
     sub_engine = ::Styles::SubEngines::Color.new
-    sub_engine.process [::Styles::Properties::MatchBackgroundColor.new(value, selector)], line
+    line = ::Styles::Line.new(line, [::Styles::Properties::MatchBackgroundColor.new(value, selector)])
+    sub_engine.process(line).to_s
   end
 
   def color

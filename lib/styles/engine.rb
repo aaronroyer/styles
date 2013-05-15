@@ -27,13 +27,15 @@ module Styles
       end
       properties = properties_hash.values
 
+      line_obj = ::Styles::Line.new(line, properties)
+
       # TODO: clean up SubEngine processing
       color_sub_engine_properties, other_properties = properties.partition do |prop|
         prop.class.ancestors.include? Styles::SubEngines::Color::PropertyMixin
       end
 
       color_sub_engine = Styles::SubEngines::Color.new
-      color_sub_engine_processed_line = color_sub_engine.process(color_sub_engine_properties, line.dup)
+      color_sub_engine_processed_line = color_sub_engine.process(line_obj).to_s
 
       other_properties.inject(color_sub_engine_processed_line) do |line_before, property|
         line_after = property.apply(line_before)

@@ -11,12 +11,15 @@ module Styles
         end
       end
 
-      def process(properties, line)
-        line_properties, match_properties = properties.partition { |p| self.class.property_type(p) == :line }
+      def process(line)
+        color_sub_engine_properties = extract_sub_engine_properties line.applicable_properties
+        line_properties, match_properties = color_sub_engine_properties.partition do |p|
+          self.class.property_type(p) == :line
+        end
 
         line_colors = get_line_colors(line_properties)
 
-        colored_line = line.dup.chomp
+        colored_line = line.to_s.chomp
 
         match_properties.each do |prop|
           next unless prop.valid_value?
@@ -27,10 +30,17 @@ module Styles
           end
         end
 
-        line_colors.any? ? "#{colors[line_colors]}#{colored_line}#{colors[:reset]}" : colored_line
+        line.update(line_colors.any? ? "#{colors[line_colors]}#{colored_line}#{colors[:reset]}" : colored_line)
+        line
       end
 
       private
+
+      def extract_sub_engine_properties(properties)
+        properties.select do |prop|
+          prop.class.ancestors.include? self.class::PropertyMixin
+        end
+      end
 
       def get_line_colors(line_properties)
         line_properties.map(&:color_to_use).reject { |c| !colors.valid?(c) }.sort
@@ -100,10 +110,6 @@ module Styles
       end
 
       module PropertyMixin
-        def apply(line)
-          ::Styles::SubEngines::Color.new.process([self], line)
-        end
-
         # Can be overridden if the color to use should be derived differently
         def color_to_use
           value

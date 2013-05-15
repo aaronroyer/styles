@@ -128,8 +128,8 @@ class ColorSubEngineTest < MiniTest::Unit::TestCase
 
   private
 
-  def process(*args)
-    sub_engine.process(*args)
+  def process(properties, line)
+    sub_engine.process(::Styles::Line.new(line, properties)).to_s
   end
 
   def sub_engine
