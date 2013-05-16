@@ -24,12 +24,28 @@ module Styles
         end
       end
 
+      def self.to_sym
+        underscore(name).split('/').last.to_sym
+      end
+
       def initialize(value, selector=nil)
         @value, @selector = value, selector
       end
 
       def colors
         ::Styles::Colors
+      end
+
+      private
+
+      def self.underscore(word)
+        word = word.dup
+        word.gsub!(/::/, '/')
+        word.gsub!(/([A-Z]+)([A-Z][a-z])/,'\1_\2')
+        word.gsub!(/([a-z\d])([A-Z])/,'\1_\2')
+        word.tr!("-", "_")
+        word.downcase!
+        word
       end
     end
   end

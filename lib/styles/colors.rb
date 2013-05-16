@@ -175,6 +175,10 @@ module Styles
       NEGATIVE_PSEUDO_VALUES.include?(color)
     end
 
+    def self.uncolor(string)
+      ansi_color.uncolor(string)
+    end
+
     private
 
     # Exists to support color_transition - it's a bit specialized. Takes an array of colors and

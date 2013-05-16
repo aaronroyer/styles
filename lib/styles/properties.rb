@@ -9,4 +9,5 @@
   match_background_color
   match_font_weight
   match_text_decoration
+  text_align
 ].each { |property| require "styles/properties/#{property}" }
