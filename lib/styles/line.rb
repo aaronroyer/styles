@@ -9,13 +9,16 @@ module Styles
       @original.freeze
       @applicable_properties = properties
 
-      @current = nil
+      @current = @original.dup
     end
 
     def current
-      (@current || @original).dup
+      @current.nil? ? nil : @current.dup
     end
-    alias :to_s :current
+
+    def to_s
+      current.to_s
+    end
 
     alias :update :current=
   end

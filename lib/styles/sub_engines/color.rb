@@ -1,20 +1,11 @@
 module Styles
   module SubEngines
-    class Color
-      # Get the property type (:line or :match) of a property instance
-      def self.property_type(property)
-        klass = property.class
-        if klass.constants.include?(:COLOR_PROPERTY_TYPE) && klass::COLOR_PROPERTY_TYPE == :match
-          :match
-        else
-          :line
-        end
-      end
+    class Color < Base
 
       def process(line)
         color_sub_engine_properties = extract_sub_engine_properties line.applicable_properties
         line_properties, match_properties = color_sub_engine_properties.partition do |p|
-          self.class.property_type(p) == :line
+          property_type(p) == :line
         end
 
         line_colors = get_line_colors(line_properties)
@@ -36,9 +27,13 @@ module Styles
 
       private
 
-      def extract_sub_engine_properties(properties)
-        properties.select do |prop|
-          prop.class.ancestors.include? self.class::PropertyMixin
+      # Get the property type (:line or :match) of a property instance
+      def property_type(property)
+        klass = property.class
+        if klass.constants.include?(:COLOR_PROPERTY_TYPE) && klass::COLOR_PROPERTY_TYPE == :match
+          :match
+        else
+          :line
         end
       end
 
@@ -103,10 +98,6 @@ module Styles
         end
 
         colored_line
-      end
-
-      def colors
-        ::Styles::Colors
       end
 
       module PropertyMixin

@@ -29,19 +29,15 @@ module Styles
 
       line_obj = ::Styles::Line.new(line, properties)
 
-      # TODO: clean up SubEngine processing
-      color_sub_engine_properties, other_properties = properties.partition do |prop|
-        prop.class.ancestors.include? Styles::SubEngines::Color::PropertyMixin
+      color_sub_engine = ::Styles::SubEngines::Color.new
+      layout_sub_engine = ::Styles::SubEngines::Layout.new
+
+      [color_sub_engine, layout_sub_engine].each do |sub_engine|
+        line_obj = sub_engine.process(line_obj)
+        return nil if line_obj.current.nil?
       end
 
-      color_sub_engine = Styles::SubEngines::Color.new
-      color_sub_engine_processed_line = color_sub_engine.process(line_obj).to_s
-
-      other_properties.inject(color_sub_engine_processed_line) do |line_before, property|
-        line_after = property.apply(line_before)
-        return nil unless line_after
-        line_after
-      end
+      line_obj.to_s
     end
 
     private

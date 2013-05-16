@@ -9,17 +9,23 @@ module Styles
     class Base
       attr_accessor :value, :selector
 
+      def self.sub_engines
+        @sub_engines ||= []
+      end
+
       def self.sub_engine(name)
-        include ::Styles::SubEngines.const_get(name.to_s.capitalize)::PropertyMixin
+        sub_engine_class = ::Styles::SubEngines.const_get(name.to_s.capitalize)
+        sub_engines << sub_engine_class
+
+        begin
+          include sub_engine_class::PropertyMixin
+        rescue NameError
+          # do nothing if PropertyMixin does not exist for SubEngine
+        end
       end
 
       def initialize(value, selector=nil)
         @value, @selector = value, selector
-      end
-
-      # Apply this property to a line and returned the result
-      def apply(line)
-        raise NotImplementedError, "apply method needs to be implemented for class: #{self.class.name}"
       end
 
       def colors
