@@ -2,17 +2,14 @@ require 'term/ansicolor'
 
 module Styles
   module Properties
-    FOREGROUND_COLOR_VALUES = [:black, :red, :green, :yellow, :blue, :magenta, :cyan, :white]
-    BACKGROUND_COLOR_VALUES = [:on_black, :on_red, :on_green, :on_yellow, :on_blue, :on_magenta, :on_cyan, :on_white]
-    COLOR_VALUES = FOREGROUND_COLOR_VALUES + BACKGROUND_COLOR_VALUES
-
     class Base
-      attr_accessor :value, :selector
+      attr_accessor :selector, :name, :value
 
       def self.sub_engines
         @sub_engines ||= []
       end
 
+      # Macro to specify a sub-engine that this property is processed by
       def self.sub_engine(name)
         sub_engine_class = ::Styles::SubEngines.const_get(name.to_s.capitalize)
         sub_engines << sub_engine_class
@@ -24,12 +21,27 @@ module Styles
         end
       end
 
+      # The name of this property, for use in stylesheets, as a Symbol
       def self.to_sym
         underscore(name).split('/').last.to_sym
       end
 
-      def initialize(value, selector=nil)
-        @value, @selector = value, selector
+      # Macro to specify other names that a property class uses, besides the main +to_sym+ version
+      def self.other_names(*names)
+        @other_names = names
+        @names = self.names
+      end
+
+      def self.names
+        @names ||= [to_sym, instance_variable_get('@other_names')].flatten.compact
+      end
+
+      def self.multiple_names?
+        names.size > 1
+      end
+
+      def initialize(selector, name, value)
+        @selector, @name, @value = selector, name, value
       end
 
       def colors

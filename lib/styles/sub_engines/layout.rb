@@ -1,3 +1,5 @@
+require 'ostruct'
+
 module Styles
   module SubEngines
     class Layout < Base
@@ -8,10 +10,11 @@ module Styles
         layout_sub_engine_properties = extract_sub_engine_properties line.applicable_properties
 
         if should_hide?(line)
-          line.update(nil)
+          line.text = nil
           return line
         end
 
+        apply_padding_border_margin(line)
         text_align(line)
 
         line
@@ -30,7 +33,7 @@ module Styles
         ta = line.prop(:text_align)
         return unless ta
 
-        size_no_color = colors.uncolor(line.current).size
+        size_no_color = colors.uncolor(line.text).size
         return if size_no_color >= terminal_width
         diff = terminal_width - size_no_color
 
@@ -38,10 +41,30 @@ module Styles
         when :left
           # do nothing
         when :right
-          line.update("#{' ' * diff}#{line.current}")
+          line.text = "#{' ' * diff}#{line.text}"
         when :center
           before, after = (' ' * (diff/2)), (' ' * (diff/2 + diff%2))
-          line.update("#{before}#{line.current}#{after}")
+          line.text = "#{before}#{line.text}#{after}"
+        end
+      end
+
+      def apply_padding_border_margin(line)
+        padding, margin = (line.prop(:padding) || blank_space_property), (line.prop(:margin) || blank_space_property)
+
+        line.left = "#{' ' * margin.left}#{' ' * padding.left}"
+        line.right = "#{' ' * padding.right}#{' ' * margin.right}"
+
+        width = line.total_width
+        line.top = ("#{' ' * width}\n") * (padding.top + margin.top)
+        line.bottom = ("#{' ' * width}\n") * (padding.bottom + margin.bottom)
+      end
+
+      def apply_margin(line)
+        margin = line.prop(:margin)
+        return unless margin
+
+        if margin.left > 0
+          line.left = ' ' * margin.left
         end
       end
 
@@ -54,6 +77,10 @@ module Styles
         rescue
           nil
         end
+      end
+
+      def blank_space_property
+        OpenStruct.new(top: 0, right: 0, bottom: 0, left: 0)
       end
     end
   end

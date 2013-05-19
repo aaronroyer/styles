@@ -19,28 +19,49 @@ module Styles
     def process(line)
       applicable_rules = rules.find_all { |rule| rule.applicable?(line) }
 
-      properties_hash = {}
+      # TODO: figure out another way to order properties, including properties with multiple forms (like margin, margin_left)
+
+      simple_properties = {}
+      multiple_names_properties = {}
       applicable_rules.each do |rule|
         rule.properties.each do |property|
-          properties_hash[property.class.name.downcase.to_sym] = property
+          if property.class.multiple_names?
+            (multiple_names_properties[property.class.to_sym] ||= []) << property
+          else
+            simple_properties[property.class.to_sym] = property
+          end
         end
       end
-      properties = properties_hash.values
+
+      properties = simple_properties.values
+
+      multiple_names_properties.keys.each do |basic_name|
+        props = multiple_names_properties[basic_name]
+        prop_class = props.first.class
+        properties << prop_class.new(props)
+      end
 
       line_obj = ::Styles::Line.new(line, properties)
 
-      color_sub_engine = ::Styles::SubEngines::Color.new
-      layout_sub_engine = ::Styles::SubEngines::Layout.new
-
-      [color_sub_engine, layout_sub_engine].each do |sub_engine|
+      sub_engines.each do |sub_engine|
         line_obj = sub_engine.process(line_obj)
-        return nil if line_obj.current.nil?
+        return nil if line_obj.text.nil?
       end
 
       line_obj.to_s
     end
 
     private
+
+    # Returns instances SubEngines in the order that they should be used in processing.
+    def sub_engines
+      @sub_engines ||= begin
+        [
+          ::Styles::SubEngines::Color.new,
+          ::Styles::SubEngines::Layout.new
+        ]
+      end
+    end
 
     def rules
       stylesheets.map(&:rules).flatten

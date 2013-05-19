@@ -4,10 +4,10 @@ require 'term/ansicolor'
 class ColorSubEngineTest < MiniTest::Unit::TestCase
   def test_can_combine_line_properties
     test_line = 'this line has a certain word in it'
-    color_prop = ::Styles::Properties::Color.new(:blue, 'word')
-    text_decor_prop = ::Styles::Properties::TextDecoration.new(:underline, 'word')
-    font_weight_prop = ::Styles::Properties::FontWeight.new(:bold, 'word')
-    no_back_color_prop = ::Styles::Properties::BackgroundColor.new(:none, 'word')
+    color_prop = ::Styles::Properties::Color.new('word', :color, :blue)
+    text_decor_prop = ::Styles::Properties::TextDecoration.new('word', :text_decoration, :underline)
+    font_weight_prop = ::Styles::Properties::FontWeight.new('word', :font_weight, :bold)
+    no_back_color_prop = ::Styles::Properties::BackgroundColor.new('word', :background_color, :none)
 
     assert_equal "#{color.blue}#{test_line}#{color.reset}", process([color_prop], test_line)
 
@@ -23,12 +23,12 @@ class ColorSubEngineTest < MiniTest::Unit::TestCase
 
   def test_can_combine_line_and_match_properties
     test_line = 'this line has a certain word in it'
-    color_prop = ::Styles::Properties::Color.new(:blue, 'word')
-    bg_color_prop = ::Styles::Properties::BackgroundColor.new(:blue, 'word')
-    string_match_color_prop = ::Styles::Properties::MatchColor.new(:green, 'word')
-    string_match_no_color_prop = ::Styles::Properties::MatchColor.new(:none, 'word')
-    regex_match_color_prop = ::Styles::Properties::MatchColor.new(:green, /word/)
-    regex_match_no_color_prop = ::Styles::Properties::MatchColor.new(:none, /word/)
+    color_prop = ::Styles::Properties::Color.new('word', :color, :blue)
+    bg_color_prop = ::Styles::Properties::BackgroundColor.new('word', :background_color, :blue)
+    string_match_color_prop = ::Styles::Properties::MatchColor.new('word', :match_color, :green)
+    string_match_no_color_prop = ::Styles::Properties::MatchColor.new('word', :match_color, :none)
+    regex_match_color_prop = ::Styles::Properties::MatchColor.new(/word/, :match_color, :green)
+    regex_match_no_color_prop = ::Styles::Properties::MatchColor.new(/word/, :match_color, :none)
 
     assert_equal "#{color.blue}this line has a certain #{color.green}word#{color.blue} in it#{color.reset}",
       process([color_prop, string_match_color_prop], test_line)
@@ -48,9 +48,9 @@ class ColorSubEngineTest < MiniTest::Unit::TestCase
 
   def test_can_combine_line_and_match_properties_with_multiple_matches
     test_line = 'this line has the number 12 and the number 89 in it'
-    color_prop = ::Styles::Properties::Color.new(:blue, 'line')
-    string_match_color_prop = ::Styles::Properties::MatchColor.new(:green, 'number')
-    regex_match_color_prop = ::Styles::Properties::MatchColor.new(:green, /\d\d/)
+    color_prop = ::Styles::Properties::Color.new('line', :color, :blue)
+    string_match_color_prop = ::Styles::Properties::MatchColor.new('number', :match_color, :green)
+    regex_match_color_prop = ::Styles::Properties::MatchColor.new(/\d\d/, :match_color, :green)
 
     assert_equal "#{color.blue}this line has the #{color.green}number#{color.blue}" +
       " 12 and the #{color.green}number#{color.blue} 89 in it#{color.reset}",
@@ -63,9 +63,9 @@ class ColorSubEngineTest < MiniTest::Unit::TestCase
 
   def test_can_combine_line_and_match_properties_with_multiple_match_colors
     test_line = 'this line has the number 12 in it'
-    color_prop = ::Styles::Properties::Color.new(:blue, 'line')
-    regex_match_color_prop = ::Styles::Properties::MatchColor.new([:green, :red], /(number) (\d\d)/)
-    regex_match_color_prop_with_none = ::Styles::Properties::MatchColor.new([:green, :none], /(number) (\d\d)/)
+    color_prop = ::Styles::Properties::Color.new('line', :color, :blue)
+    regex_match_color_prop = ::Styles::Properties::MatchColor.new(/(number) (\d\d)/, :match_color, [:green, :red])
+    regex_match_color_prop_with_none = ::Styles::Properties::MatchColor.new(/(number) (\d\d)/, :match_color, [:green, :none])
 
     assert_equal "#{color.blue}this line has the #{color.green}number#{color.blue}" +
       " #{color.red}12#{color.blue} in it#{color.reset}",
@@ -77,8 +77,8 @@ class ColorSubEngineTest < MiniTest::Unit::TestCase
 
   def test_can_combine_misc_line_and_match_properties
     test_line = 'this line has the number 12 in it'
-    underline_prop = ::Styles::Properties::TextDecoration.new(:underline, 'number')
-    blink_match_prop = ::Styles::Properties::MatchTextDecoration.new(:blink, 'number')
+    underline_prop = ::Styles::Properties::TextDecoration.new('number', :text_decoration, :underline)
+    blink_match_prop = ::Styles::Properties::MatchTextDecoration.new('number', :match_text_decoration, :blink)
 
     assert_equal "#{color.underline}this line has the #{color.reset}#{color.blink}number#{color.reset}" +
       "#{color.underline} 12 in it#{color.reset}",
@@ -87,11 +87,11 @@ class ColorSubEngineTest < MiniTest::Unit::TestCase
 
   def test_background_colors_for_line_applies_to_matches_if_no_background_color_of_their_own
     test_line = 'this line has a certain word in it'
-    bg_color_prop = ::Styles::Properties::BackgroundColor.new(:blue, 'word')
-    string_match_color_prop = ::Styles::Properties::MatchColor.new(:green, 'word')
-    regex_match_color_prop = ::Styles::Properties::MatchColor.new(:green, /word/)
-    regex_groups_match_color_prop = ::Styles::Properties::MatchColor.new([:green, :red], /(certain) (word)/)
-    regex_groups_match_color_prop_with_none = ::Styles::Properties::MatchColor.new([:green, :none], /(certain) (word)/)
+    bg_color_prop = ::Styles::Properties::BackgroundColor.new('word', :background_color, :blue)
+    string_match_color_prop = ::Styles::Properties::MatchColor.new('word', :match_color, :green)
+    regex_match_color_prop = ::Styles::Properties::MatchColor.new(/word/, :match_color, :green)
+    regex_groups_match_color_prop = ::Styles::Properties::MatchColor.new(/(certain) (word)/, :match_color, [:green, :red])
+    regex_groups_match_color_prop_with_none = ::Styles::Properties::MatchColor.new(/(certain) (word)/, :match_color, [:green, :none])
 
     assert_equal "#{color.on_blue}this line has a certain #{color.green}word#{color.reset}#{color.on_blue} in it#{color.reset}",
       process([bg_color_prop, string_match_color_prop], test_line)
@@ -108,11 +108,13 @@ class ColorSubEngineTest < MiniTest::Unit::TestCase
 
   def test_color_for_line_applies_to_matches_if_no_color_of_their_own
     test_line = 'this line has a certain word in it'
-    bg_color_prop = ::Styles::Properties::Color.new(:blue, 'word')
-    string_match_color_prop = ::Styles::Properties::MatchBackgroundColor.new(:green, 'word')
-    regex_match_color_prop = ::Styles::Properties::MatchBackgroundColor.new(:green, /word/)
-    regex_groups_match_color_prop = ::Styles::Properties::MatchBackgroundColor.new([:green, :red], /(certain) (word)/)
-    regex_groups_match_color_prop_with_none = ::Styles::Properties::MatchBackgroundColor.new([:green, :none], /(certain) (word)/)
+    bg_color_prop = ::Styles::Properties::Color.new('word', :color, :blue)
+    string_match_color_prop = ::Styles::Properties::MatchBackgroundColor.new('word', :match_background_color, :green)
+    regex_match_color_prop = ::Styles::Properties::MatchBackgroundColor.new(/word/, :match_background_color, :green)
+    regex_groups_match_color_prop = ::Styles::Properties::MatchBackgroundColor.new(/(certain) (word)/,
+      :match_background_color, [:green, :red])
+    regex_groups_match_color_prop_with_none = ::Styles::Properties::MatchBackgroundColor.new(/(certain) (word)/,
+      :match_background_color, [:green, :none])
 
     assert_equal "#{color.blue}this line has a certain #{color.on_green}word#{color.reset}#{color.blue} in it#{color.reset}",
       process([bg_color_prop, string_match_color_prop], test_line)

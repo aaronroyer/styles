@@ -5,16 +5,16 @@ class FontWeightTest < MiniTest::Unit::TestCase
   def test_can_embolden_a_line
     test_line = 'this is a test line'
 
-    assert_equal "#{color.bold}#{test_line}#{color.reset}", process(:bold, 'test', test_line)
-    assert_equal test_line, process(:normal, 'test', test_line)
-    assert_equal test_line, process(:invalid, 'test', test_line)
+    assert_equal "#{color.bold}#{test_line}#{color.reset}", process('test', :bold, test_line)
+    assert_equal test_line, process('test', :normal, test_line)
+    assert_equal test_line, process('test', :invalid, test_line)
   end
 
   private
 
-  def process(value, selector, line)
+  def process(selector, value, line)
     sub_engine = ::Styles::SubEngines::Color.new
-    line = ::Styles::Line.new(line, [::Styles::Properties::FontWeight.new(value, selector)])
+    line = ::Styles::Line.new(line, [::Styles::Properties::FontWeight.new(selector, :font_weight, value)])
     sub_engine.process(line).to_s
   end
 

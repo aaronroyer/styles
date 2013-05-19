@@ -5,30 +5,30 @@ class MatchTextDecorationTest < MiniTest::Unit::TestCase
   def test_decorate_match_text
     test_line = 'this is a test line'
 
-    assert_equal "this is a #{color.underline}test#{color.reset} line", process(:underline, 'test', test_line)
-    assert_equal "this is a #{color.strikethrough}test#{color.reset} line", process(:strikethrough, 'test', test_line)
-    assert_equal "this is a #{color.strikethrough}test#{color.reset} line", process(:line_through, 'test', test_line)
-    assert_equal "this is a #{color.blink}test#{color.reset} line", process(:blink, 'test', test_line)
-    assert_equal "this is a #{color.underline}test#{color.reset} line", process(:underline, /test/, test_line)
-    assert_equal "this is a #{color.underline}test#{color.reset} line", process(:underline, /(test)/, test_line)
-    assert_equal test_line, process(:none, 'test', test_line)
-    assert_equal test_line, process(:invalid, 'test', test_line)
+    assert_equal "this is a #{color.underline}test#{color.reset} line", process('test', :underline, test_line)
+    assert_equal "this is a #{color.strikethrough}test#{color.reset} line", process('test', :strikethrough, test_line)
+    assert_equal "this is a #{color.strikethrough}test#{color.reset} line", process('test', :line_through, test_line)
+    assert_equal "this is a #{color.blink}test#{color.reset} line", process('test', :blink, test_line)
+    assert_equal "this is a #{color.underline}test#{color.reset} line", process(/test/, :underline, test_line)
+    assert_equal "this is a #{color.underline}test#{color.reset} line", process(/(test)/, :underline, test_line)
+    assert_equal test_line, process('test', :none, test_line)
+    assert_equal test_line, process('test', :invalid, test_line)
   end
 
   def test_decorate_multiple_matches
     test_line = 'this is a another test line'
 
     assert_equal "this is a #{color.underline}another#{color.reset} #{color.strikethrough}test#{color.reset} line",
-      process([:underline, :strikethrough], /(another) (test)/, test_line)
+      process(/(another) (test)/, [:underline, :strikethrough], test_line)
     assert_equal "this is a #{color.underline}another#{color.reset} test line",
-      process([:underline, :none], /(another) (test)/, test_line)
+      process(/(another) (test)/, [:underline, :none], test_line)
   end
 
   private
 
-  def process(value, selector, line)
+  def process(selector, value, line)
     sub_engine = ::Styles::SubEngines::Color.new
-    line = ::Styles::Line.new(line, [::Styles::Properties::MatchTextDecoration.new(value, selector)])
+    line = ::Styles::Line.new(line, [::Styles::Properties::MatchTextDecoration.new(selector, :match_text_decoration, value)])
     sub_engine.process(line).to_s
   end
 

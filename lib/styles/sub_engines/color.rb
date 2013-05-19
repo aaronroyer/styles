@@ -21,7 +21,7 @@ module Styles
           end
         end
 
-        line.update(line_colors.any? ? "#{colors[line_colors]}#{colored_line}#{colors[:reset]}" : colored_line)
+        line.text = line_colors.any? ? "#{colors[line_colors]}#{colored_line}#{colors[:reset]}" : colored_line
         line
       end
 

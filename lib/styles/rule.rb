@@ -18,9 +18,9 @@ module Styles
       @unrecognized_properties = {}
 
       @properties = properties_hash.keys.map do |name|
-        property_class = find_property_class(name)
+        property_class = ::Styles::Properties.find_class_by_property_name(name)
         if property_class
-          property_class.new(properties_hash[name], selector)
+          property_class.new(selector, name, properties_hash[name])
         else
           unrecognized_properties[name] = properties_hash[name]
           nil
@@ -36,7 +36,7 @@ module Styles
     #
     # ANSI color codes are ignored when matching to avoid false positives or negatives.
     def applicable?(line)
-      uncolored_line = color.uncolor line.chomp
+      uncolored_line = color.uncolor(line.chomp)
       case selector
         when String
           uncolored_line.include?(selector)
@@ -59,15 +59,6 @@ module Styles
     end
 
     private
-
-    def find_property_class(property_name)
-      class_name = property_name.to_s.split('_').map(&:capitalize).join
-      begin
-        ::Styles::Properties.const_get(class_name)
-      rescue NameError
-        nil
-      end
-    end
 
     def color
       ::Term::ANSIColor

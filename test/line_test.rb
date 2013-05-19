@@ -9,15 +9,15 @@ class LineTest < MiniTest::Unit::TestCase
     updated = 'this is an updated line'
     line = Line.new original
     assert_equal original, line.to_s
-    assert_equal original, line.current
+    assert_equal original, line.text
 
-    line.update updated
+    line.text = updated
     assert_equal updated, line.to_s
-    assert_equal updated, line.current
+    assert_equal updated, line.text
     assert_equal original, line.original
 
     line = Line.new original
-    line.current = updated
+    line.text = updated
     assert_equal updated, line.to_s
     assert_equal original, line.original
   end
