@@ -32,6 +32,10 @@ module Styles
       colors.uncolor("#{left}#{text}#{right}").size
     end
 
+    def text_width
+      colors.uncolor(text).size
+    end
+
     def prop(property_name)
       prop_name = property_name.to_sym
       applicable_properties.find { |prop| prop.class.to_sym == prop_name }

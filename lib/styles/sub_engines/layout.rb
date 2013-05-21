@@ -50,13 +50,40 @@ module Styles
 
       def apply_padding_border_margin(line)
         padding, margin = (line.prop(:padding) || blank_space_property), (line.prop(:margin) || blank_space_property)
+        border = line.prop(:border) || ::Styles::Properties::Border.new(:any, :border, :none)
 
-        line.left = "#{' ' * margin.left}#{' ' * padding.left}"
-        line.right = "#{' ' * padding.right}#{' ' * margin.right}"
+        line.left = "#{' ' * margin.left}#{border.left_char}#{' ' * padding.left}"
+        line.right = "#{' ' * padding.right}#{border.right_char}#{' ' * margin.right}"
 
         width = line.total_width
-        line.top = ("#{' ' * width}\n") * (padding.top + margin.top)
-        line.bottom = ("#{' ' * width}\n") * (padding.bottom + margin.bottom)
+        text_width = line.text_width
+        border_width = padding.left + text_width + padding.right
+        blank_line = "#{' ' * width}\n"
+
+        line.top = blank_line * margin.top
+
+        if border.top == :none
+          line.top << blank_line * padding.top
+        else
+          line.top << "#{' ' * margin.left}#{border.top_line_chars(border_width)}#{' ' * margin.right}\n"
+          if padding.top > 0
+            extender_line = "#{' ' * margin.left}#{border.left_char}#{' ' * border_width}#{border.right_char}#{' ' * margin.right}\n"
+            line.top << extender_line * padding.top
+          end
+        end
+
+        if border.bottom == :none
+          line.bottom = blank_line * padding.bottom
+        else
+          line.bottom = ''
+          if padding.bottom > 0
+            extender_line = "#{' ' * margin.left}#{border.left_char}#{' ' * border_width}#{border.right_char}#{' ' * margin.right}\n"
+            line.bottom << extender_line * padding.bottom
+          end
+          line.bottom << "#{' ' * margin.left}#{border.bottom_line_chars(border_width)}#{' ' * margin.right}\n"
+        end
+
+        line.bottom << blank_line * margin.bottom
       end
 
       def apply_margin(line)
@@ -81,6 +108,10 @@ module Styles
 
       def blank_space_property
         OpenStruct.new(top: 0, right: 0, bottom: 0, left: 0)
+      end
+
+      def blank_border_property
+        OpenStruct.new(top: :none, right: :none, bottom: :none, left: :none)
       end
     end
   end

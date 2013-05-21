@@ -19,8 +19,6 @@ module Styles
     def process(line)
       applicable_rules = rules.find_all { |rule| rule.applicable?(line) }
 
-      # TODO: figure out another way to order properties, including properties with multiple forms (like margin, margin_left)
-
       simple_properties = {}
       multiple_names_properties = {}
       applicable_rules.each do |rule|
