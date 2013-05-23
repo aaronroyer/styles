@@ -39,6 +39,17 @@ class PaddingTest < MiniTest::Unit::TestCase
 
     assert_equal [4, 0, 0, 0], combine([prop(:padding, :none), prop(:padding_top, 4)]).all_padding
     assert_equal [0, 4, 4, 4], combine([prop(:padding, 4), prop(:padding_top, :none)]).all_padding
+
+    no_top = combine([prop(:padding, 3), prop(:padding_top, 0)])
+    left_and_right = combine([prop(:padding_left, 2), prop(:padding_right, 5)])
+    assert_equal [0, 5, 3, 2], combine([no_top, left_and_right]).all_padding
+  end
+
+  def test_can_configure_with_side_values
+    assert_equal [1, 2, 3, 4], prop(:padding, '1 2 3 4').all_padding
+    assert_equal [1, 2, 3, 0], prop(:padding, '1 2 3').all_padding
+    assert_equal [1, 2, 0, 0], prop(:padding, '1 2').all_padding
+    assert_equal [1, 0, 0, 0], prop(:padding, '1').all_padding
   end
 
   def test_padding_left

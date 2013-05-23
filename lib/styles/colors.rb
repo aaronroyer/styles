@@ -61,6 +61,33 @@ module Styles
       alias_method :c, :[]
     end
 
+    # Apply any valid colors to a string and auto-reset (if any colors applied). Does not apply
+    # colors to an empty string.
+    def self.color(string, *colors)
+      return string if string.nil? or string.empty?
+      colors.flatten!
+      colors.reject! { |col| col == :none || !VALID_VALUES.include?(col) }
+      if colors.any?
+        "#{colors.map { |col| c(col) }.join}#{string}#{c(:reset)}"
+      else
+        string
+      end
+    end
+
+    # Apply any valid colors to a string and auto-reset (if any colors applied). If there are any
+    # resets in the middle of the string, reapply the colors after them.
+    def self.force_color(string, *colors)
+      return string if string.nil? or string.empty?
+      colors.flatten!
+      colors.reject! { |col| col == :none || !VALID_VALUES.include?(col) }
+      if colors.any?
+        codes = colors.map { |col| c(col) }.join
+        "#{codes}#{string.gsub(c(:reset), c(:reset) + codes)}#{c(:reset)}"
+      else
+        string
+      end
+    end
+
     def self.valid?(color)
       is_valid_basic_value?(color) || is_compound_color?(color)
     end

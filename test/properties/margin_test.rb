@@ -29,6 +29,13 @@ class MarginTest < MiniTest::Unit::TestCase
     assert_equal [0, 0, 0, 0], prop(:margin_right, :none).all_margins
   end
 
+  def test_can_configure_with_side_values
+    assert_equal [1, 2, 3, 4], prop(:margin, '1 2 3 4').all_margins
+    assert_equal [1, 2, 3, 0], prop(:margin, '1 2 3').all_margins
+    assert_equal [1, 2, 0, 0], prop(:margin, '1 2').all_margins
+    assert_equal [1, 0, 0, 0], prop(:margin, '1').all_margins
+  end
+
   def test_can_combine_margin_properties
     assert_equal [0, 3, 0, 2], combine([prop(:margin_left, 2), prop(:margin_right, 3)]).all_margins
     assert_equal [0, 0, 0, 2], combine([prop(:margin_left, 2)]).all_margins
@@ -39,6 +46,10 @@ class MarginTest < MiniTest::Unit::TestCase
 
     assert_equal [4, 0, 0, 0], combine([prop(:margin, :none), prop(:margin_top, 4)]).all_margins
     assert_equal [0, 4, 4, 4], combine([prop(:margin, 4), prop(:margin_top, :none)]).all_margins
+
+    no_top = combine([prop(:margin, 3), prop(:margin_top, 0)])
+    left_and_right = combine([prop(:margin_left, 2), prop(:margin_right, 5)])
+    assert_equal [0, 5, 3, 2], combine([no_top, left_and_right]).all_margins
   end
 
   def test_margin_left

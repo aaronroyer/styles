@@ -5,8 +5,6 @@ module Styles
     class Layout < Base
 
       def process(line)
-        # TODO: wrap Line in a LineLayoutCalculations object? make that a mixin?
-
         layout_sub_engine_properties = extract_sub_engine_properties line.applicable_properties
 
         if should_hide?(line)
@@ -52,38 +50,49 @@ module Styles
         padding, margin = (line.prop(:padding) || blank_space_property), (line.prop(:margin) || blank_space_property)
         border = line.prop(:border) || ::Styles::Properties::Border.new(:any, :border, :none)
 
-        line.left = "#{' ' * margin.left}#{border.left_char}#{' ' * padding.left}"
-        line.right = "#{' ' * padding.right}#{border.right_char}#{' ' * margin.right}"
+        return unless padding || margin || border
+
+        bg_color = if bg_color_prop = line.prop(:background_color)
+                     bg_color_prop.valid_value? ? bg_color_prop.color_to_use : :none
+                   else
+                     :none
+                   end
+
+        line.left = (' ' * margin.left) + colors.force_color("#{border.left_char}#{' ' * padding.left}", bg_color)
+        line.right = colors.force_color("#{' ' * padding.right}#{border.right_char}", bg_color) +(' ' * margin.right)
 
         width = line.total_width
         text_width = line.text_width
         border_width = padding.left + text_width + padding.right
-        blank_line = "#{' ' * width}\n"
+        margin_line = "#{' ' * width}\n"
+        padding_line = "#{' ' * margin.left}#{colors.color(' ' * border_width, bg_color)}#{' ' * margin.right}\n"
 
-        line.top = blank_line * margin.top
+        line.top = margin_line * margin.top
+
+        extender_line = (' ' * margin.left) +
+          colors.force_color("#{border.left_char}#{' ' * border_width}#{border.right_char}", bg_color) +
+          (' ' * margin.right) + "\n"
 
         if border.top == :none
-          line.top << blank_line * padding.top
+          line.top << padding_line * padding.top
         else
-          line.top << "#{' ' * margin.left}#{border.top_line_chars(border_width)}#{' ' * margin.right}\n"
-          if padding.top > 0
-            extender_line = "#{' ' * margin.left}#{border.left_char}#{' ' * border_width}#{border.right_char}#{' ' * margin.right}\n"
-            line.top << extender_line * padding.top
-          end
+          line.top << (' ' * margin.left) +
+            colors.force_color("#{border.top_line_chars(border_width)}", bg_color) +
+            (' ' * margin.right) + "\n"
+          line.top << (extender_line * padding.top) if padding.top > 0
         end
 
         if border.bottom == :none
-          line.bottom = blank_line * padding.bottom
+          line.bottom = padding_line * padding.bottom
         else
           line.bottom = ''
-          if padding.bottom > 0
-            extender_line = "#{' ' * margin.left}#{border.left_char}#{' ' * border_width}#{border.right_char}#{' ' * margin.right}\n"
-            line.bottom << extender_line * padding.bottom
-          end
-          line.bottom << "#{' ' * margin.left}#{border.bottom_line_chars(border_width)}#{' ' * margin.right}\n"
+          line.bottom << (extender_line * padding.bottom) if padding.bottom > 0
+          line.bottom << (' ' * margin.left) +
+            colors.force_color("#{border.bottom_line_chars(border_width)}", bg_color) +
+            (' ' * margin.right) + "\n"
         end
 
-        line.bottom << blank_line * margin.bottom
+        line.bottom << margin_line * margin.bottom
       end
 
       def apply_margin(line)

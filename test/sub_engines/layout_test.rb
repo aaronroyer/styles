@@ -64,21 +64,34 @@ RESULT
 
     margin_1 = ::Styles::Properties::Margin.new('here', :margin, 1)
     padding_1 = ::Styles::Properties::Padding.new('here', :padding, 1)
+    border = ::Styles::Properties::Border.new('here', :border, :solid)
 
     # Add trailing whitespace in a peculiar way so it doesn't get stripped by tools
     output = <<RESULT
-#{' ' * (2 + test_line.size + 2)}
+#{' ' * (3 + test_line.size + 3)}
  #{s[:top_left]}#{s[:top] * (1 + test_line.size + 1)}#{s[:top_right]}#{' '}
  #{s[:left]}#{' ' * (1 + test_line.size + 1)}#{s[:right]}#{' '}
  #{s[:left]} #{test_line} #{s[:right]}#{' '}
  #{s[:left]}#{' ' * (1 + test_line.size + 1)}#{s[:right]}#{' '}
  #{s[:bottom_left]}#{s[:bottom] * (1 + test_line.size + 1)}#{s[:bottom_right]}#{' '}
-#{' ' * (2 + test_line.size + 2)}
+#{' ' * (3 + test_line.size + 3)}
 RESULT
+
+    assert_equal output, process([margin_1, padding_1, border], test_line)
   end
 
   def test_can_combine_padding_and_background_color
-    # TODO
+    test_line = "#{color.on_blue}here it is#{color.reset}" # assume already processed by color sub-engine
+    padding = ::Styles::Properties::Padding.new('here', :padding, 1)
+    bg_color = ::Styles::Properties::BackgroundColor.new('here', :background_color, :blue)
+
+    output = <<RESULT
+#{color.on_blue}#{' ' * 12}#{color.reset}
+#{color.on_blue} #{color.reset}#{test_line}#{color.on_blue} #{color.reset}
+#{color.on_blue}#{' ' * 12}#{color.reset}
+RESULT
+
+    assert_equal output, process([padding, bg_color], test_line)
   end
 
   private

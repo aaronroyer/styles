@@ -129,6 +129,26 @@ class ColorsTest < MiniTest::Unit::TestCase
     assert_equal '', c.color_transition([:no_fg_color, :on_blue], :on_blue, false)
   end
 
+  def test_can_color_strings_with_auto_reset
+    assert_equal ansi.blue + 'hello' + ansi.reset, c.color('hello', :blue)
+    assert_equal ansi.blue + ansi.on_green + 'hello' + ansi.reset, c.color('hello', :blue, :on_green)
+    assert_equal ansi.blue + ansi.on_green + 'hello' + ansi.reset, c.color('hello', [:blue, :on_green])
+    assert_equal ansi.underline + 'hello' + ansi.reset, c.color('hello', :underline)
+    assert_equal 'hello', c.color('hello', :invalid)
+    assert_equal 'hello', c.color('hello', :none)
+    assert_equal ansi.red + 'hello' + ansi.reset, c.color('hello', :none, :red)
+    assert_equal '', c.color('', :red)
+  end
+
+  def test_force_color
+    str = "has #{ansi.red}some#{ansi.reset} red"
+    assert_equal "#{ansi.on_blue}has #{ansi.red}some#{ansi.reset}#{ansi.on_blue} red#{ansi.reset}",
+      c.force_color(str, :on_blue)
+
+    assert_equal ansi.blue + 'hello' + ansi.reset, c.force_color('hello', :blue)
+    assert_equal '', c.force_color('', :red)
+  end
+
   private
 
   def c
