@@ -13,6 +13,7 @@
   padding
   margin
   border
+  width
 ].each { |property| require "styles/properties/#{property}" }
 
 module Styles

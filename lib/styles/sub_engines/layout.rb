@@ -12,8 +12,8 @@ module Styles
           return line
         end
 
+        apply_width_and_text_align(line)
         apply_padding_border_margin(line)
-        text_align(line)
 
         line
       end
@@ -25,24 +25,39 @@ module Styles
         display_property && ::Styles::Properties::Display::HIDE_VALUES.include?(display_property.value)
       end
 
-      def text_align(line)
+      def apply_width_and_text_align(line)
         # Make this work within the set width?
 
-        ta = line.prop(:text_align)
-        return unless ta
-
+        width_prop, text_align_prop = line.prop(:width), line.prop(:text_align)
         size_no_color = colors.uncolor(line.text).size
-        return if size_no_color >= terminal_width
-        diff = terminal_width - size_no_color
+        width = width_prop ? width_prop.width : terminal_width
 
-        case ta.value
-        when :left
-          # do nothing
-        when :right
-          line.text = "#{' ' * diff}#{line.text}"
-        when :center
-          before, after = (' ' * (diff/2)), (' ' * (diff/2 + diff%2))
-          line.text = "#{before}#{line.text}#{after}"
+        return if size_no_color >= width
+        diff = width - size_no_color
+
+        bg_color = if bg_color_prop = line.prop(:background_color)
+                     bg_color_prop.color_to_use
+                   else
+                     :none
+                   end
+
+        if text_align_prop
+          case text_align_prop.value
+          when :left
+            # Pad right only if width explicitly set
+            line.text = "#{line.text}#{colors.color(' ' * diff, bg_color)}" if width_prop
+          when :right
+            pad = ' ' * diff
+            pad = colors.color(pad, bg_color) if width_prop
+            line.text = "#{pad}#{line.text}"
+          when :center
+            before, after = (' ' * (diff/2)), (' ' * (diff/2 + diff%2))
+            before, after = [before, after].map { |pad| colors.color(pad, bg_color)} if width_prop
+            line.text = "#{before}#{line.text}#{after}"
+          end
+        else
+          # Assume left align, pad right only if width explicitly set
+          line.text = "#{line.text}#{colors.color(' ' * diff, bg_color)}" if width_prop
         end
       end
 
@@ -62,8 +77,8 @@ module Styles
         line.right = colors.force_color("#{' ' * padding.right}#{border.right_char}", bg_color) +(' ' * margin.right)
 
         width = line.total_width
-        text_width = line.text_width
-        border_width = padding.left + text_width + padding.right
+        content_width = line.content_width
+        border_width = padding.left + content_width + padding.right
         margin_line = "#{' ' * width}\n"
         padding_line = "#{' ' * margin.left}#{colors.color(' ' * border_width, bg_color)}#{' ' * margin.right}\n"
 
@@ -104,6 +119,7 @@ module Styles
         end
       end
 
+      # Tries to determine terminal width, returns 80 by default
       def terminal_width
         require 'io/console'
         IO.console.winsize[1]
@@ -111,7 +127,7 @@ module Styles
         begin
           `tput co`.to_i
         rescue
-          nil
+          80
         end
       end
 

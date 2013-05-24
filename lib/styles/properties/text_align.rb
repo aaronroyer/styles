@@ -3,7 +3,7 @@ module Styles
     class TextAlign < Base
       sub_engine :layout
 
-      # Left out: justify and inherit
+      # Not included: justify and inherit
       VALUES = [:left, :right, :center]
     end
   end

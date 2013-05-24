@@ -32,7 +32,7 @@ module Styles
       colors.uncolor("#{left}#{text}#{right}").size
     end
 
-    def text_width
+    def content_width
       colors.uncolor(text).size
     end
 
