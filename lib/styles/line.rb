@@ -10,6 +10,7 @@ module Styles
       @applicable_properties = properties
 
       @text = @original.dup
+      @top = @right = @bottom = @left = ''
     end
 
     # The current content of the line, possibly already altered by processing. By content we mean

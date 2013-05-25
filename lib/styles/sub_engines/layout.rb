@@ -73,27 +73,44 @@ module Styles
                      :none
                    end
 
-        line.left = (' ' * margin.left) + colors.force_color("#{border.left_char}#{' ' * padding.left}", bg_color)
-        line.right = colors.force_color("#{' ' * padding.right}#{border.right_char}", bg_color) +(' ' * margin.right)
+        # First establish the main line padding and border
+        line.left = colors.force_color("#{border.left_char}#{' ' * padding.left}", bg_color)
+        line.right = colors.force_color("#{' ' * padding.right}#{border.right_char}", bg_color)
 
-        width = line.total_width
+        # Calculate margins and add to the main line
+        margin_left, margin_right =
+          if margin.left == :auto || margin.right == :auto
+            diff = terminal_width - line.total_width
+            if diff > 0
+              [(' ' * (diff/2)), (' ' * (diff/2 + diff%2))]
+            else
+              ['', '']
+            end
+          else
+            [' ' * margin.left, ' ' * margin.right]
+          end
+
+        line.left = margin_left + line.left
+        line.right = line.right + margin_right
+
         content_width = line.content_width
         border_width = padding.left + content_width + padding.right
-        margin_line = "#{' ' * width}\n"
-        padding_line = "#{' ' * margin.left}#{colors.color(' ' * border_width, bg_color)}#{' ' * margin.right}\n"
 
-        line.top = margin_line * margin.top
+        margin_line = "#{' ' * line.total_width}\n"
+        padding_line = "#{margin_left}#{colors.color(' ' * border_width, bg_color)}#{margin_right}\n"
 
-        extender_line = (' ' * margin.left) +
+        line.top = margin_line * margin.top if margin.top.is_a?(Integer)
+
+        extender_line = margin_left +
           colors.force_color("#{border.left_char}#{' ' * border_width}#{border.right_char}", bg_color) +
-          (' ' * margin.right) + "\n"
+            margin_right + "\n"
 
         if border.top == :none
           line.top << padding_line * padding.top
         else
-          line.top << (' ' * margin.left) +
+          line.top << margin_left +
             colors.force_color("#{border.top_line_chars(border_width)}", bg_color) +
-            (' ' * margin.right) + "\n"
+              margin_right + "\n"
           line.top << (extender_line * padding.top) if padding.top > 0
         end
 
@@ -102,12 +119,12 @@ module Styles
         else
           line.bottom = ''
           line.bottom << (extender_line * padding.bottom) if padding.bottom > 0
-          line.bottom << (' ' * margin.left) +
+          line.bottom << margin_left +
             colors.force_color("#{border.bottom_line_chars(border_width)}", bg_color) +
-            (' ' * margin.right) + "\n"
+              margin_right + "\n"
         end
 
-        line.bottom << margin_line * margin.bottom
+        line.bottom << margin_line * margin.bottom if margin.bottom.is_a?(Integer)
       end
 
       def apply_margin(line)

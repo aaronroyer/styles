@@ -26,7 +26,10 @@ class MarginTest < MiniTest::Unit::TestCase
     assert_equal [0, 0, 10, 0], prop(:margin_bottom, 10).all_margins
 
     assert_equal [0, 0, 0, 0], prop(:margin, :none).all_margins
+    assert_equal [0, 0, 0, 0], prop(:margin, :wat).all_margins
     assert_equal [0, 0, 0, 0], prop(:margin_right, :none).all_margins
+
+    assert_equal [:auto, :auto, :auto, :auto], prop(:margin, :auto).all_margins
   end
 
   def test_can_configure_with_side_values
@@ -34,6 +37,10 @@ class MarginTest < MiniTest::Unit::TestCase
     assert_equal [1, 2, 3, 0], prop(:margin, '1 2 3').all_margins
     assert_equal [1, 2, 0, 0], prop(:margin, '1 2').all_margins
     assert_equal [1, 0, 0, 0], prop(:margin, '1').all_margins
+
+    assert_equal [1, :auto, 0, 0], prop(:margin, '1 auto').all_margins
+    assert_equal [1, :auto, 3, :auto], prop(:margin, '1 auto 3 auto').all_margins
+    assert_equal [1, 0, 3, 0], prop(:margin, '1 wat 3 huh').all_margins
   end
 
   def test_can_combine_margin_properties
@@ -57,6 +64,16 @@ class MarginTest < MiniTest::Unit::TestCase
     stub_term_width(80)
     assert_equal "  #{test_line}", process('line', :margin_left, 2, test_line)
     assert_equal "          #{test_line}", process('line', :margin_left, 10, test_line)
+  end
+
+  def test_auto
+    test_line = 'the line'
+    stub_term_width(20)
+    assert_equal "      #{test_line}      ", process('line', :margin, :auto, test_line)
+    assert_equal "      #{test_line}      ", process('line', :margin_left, :auto, test_line)
+    assert_equal "      #{test_line}      ", process('line', :margin_right, :auto, test_line)
+    assert_equal "      #{test_line}      ", process('line', :margin, '0 auto', test_line)
+    assert_equal "      #{test_line}      ", process('line', :margin, '0 auto 0 auto', test_line)
   end
 
   private

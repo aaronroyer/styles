@@ -14,7 +14,9 @@ module Styles
           if (val = args[2]).is_a?(String)
             @name = :margin
             @sub_properties = []
-            side_values = args[2].split.map(&:to_i)
+            side_values = args[2].split.map do |side_value|
+              side_value == 'auto' ? :auto : side_value.to_i
+            end
             %w[top right bottom left].each_with_index do |side, idx|
               side_value = side_values[idx]
               if side_value
@@ -44,7 +46,7 @@ module Styles
       # If the value is an integer, returns that. For any other value, including the valid
       # <tt>:none</tt> value, <tt>0</tt> is returned.
       def normalized_value
-        value.is_a?(Integer) ? value : 0
+        (value.is_a?(Integer) || value == :auto) ? value : 0
       end
 
       private
