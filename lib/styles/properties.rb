@@ -14,6 +14,7 @@
   margin
   border
   width
+  function
 ].each { |property| require "styles/properties/#{property}" }
 
 module Styles

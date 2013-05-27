@@ -26,8 +26,6 @@ module Styles
       end
 
       def apply_width_and_text_align(line)
-        # Make this work within the set width?
-
         width_prop, text_align_prop = line.prop(:width), line.prop(:text_align)
         size_no_color = colors.uncolor(line.text).size
         width = width_prop ? width_prop.width : terminal_width

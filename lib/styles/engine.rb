@@ -55,6 +55,7 @@ module Styles
     def sub_engines
       @sub_engines ||= begin
         [
+          ::Styles::SubEngines::PreProcessor.new,
           ::Styles::SubEngines::Color.new,
           ::Styles::SubEngines::Layout.new
         ]

@@ -11,7 +11,7 @@ module Styles
 
       # Macro to specify a sub-engine that this property is processed by
       def self.sub_engine(name)
-        sub_engine_class = ::Styles::SubEngines.const_get(name.to_s.capitalize)
+        sub_engine_class = ::Styles::SubEngines.const_get(camelize(name.to_s))
         sub_engines << sub_engine_class
 
         begin
@@ -58,6 +58,10 @@ module Styles
         word.tr!("-", "_")
         word.downcase!
         word
+      end
+
+      def self.camelize(word)
+        word.capitalize.gsub(/(?:_|(\/))([a-z\d]*)/) { "#{$1}#{$2.capitalize}" }
       end
     end
   end
