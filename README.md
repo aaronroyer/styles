@@ -140,9 +140,7 @@ a bit gimmicky
 
 Output
 
-<pre style="color:white; background-color:black; padding: 5px;">
-<span style="display:inline-block; border:1px solid blue; padding:13px; margin:23px 23px 23px 23px; width: 220px; text-align:right">a bit gimmicky</span>
-</pre>
+<img src="http://i.imgur.com/jhkgBic.png" width="450px" />
 
 
 #### Do arbitrary processing on lines
