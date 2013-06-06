@@ -116,11 +116,7 @@ this is not
 
 Output
 
-<pre style="color:white; background-color:black; padding: 5px;">
-this is interesting
-<span style="background-color:green">this is VERY interesting</span>
-</pre>
-
+<img src="http://i.imgur.com/YcN7UGv.png" width="400px" />
 
 #### Do crazy stuff with CSS-style layout properties
 
