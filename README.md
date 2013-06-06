@@ -161,9 +161,7 @@ the password is: 5up3rs3cr3t
 
 Output
 
-<pre style="color:white; background-color:black; padding: 5px;">
-the password is: XXXXXX
-</pre>
+<img src="http://i.imgur.com/HAkOPKU.png" width="500px" />
 
 
 
@@ -239,8 +237,6 @@ _See also: match_color_
 
 ----
 
-___WARNING: the rest of the examples in this README lack proper formatting - I'm working on fixing this___
-
 #### font_weight
 <a name="font_weight" />
 
@@ -256,9 +252,7 @@ Valid values: ```normal, bold```
 }
 ```
 
-<pre style="color:white; background-color:black; padding: 5px;">
-<span style="font-weight:bold">this is bold</span>
-</pre>
+<img src="http://i.imgur.com/ujS2mHq.png" width="500px" />
 
 ```ruby
 'normal' - {
@@ -266,9 +260,7 @@ Valid values: ```normal, bold```
 }
 ```
 
-<pre style="color:white; background-color:black; padding: 5px;">
-<span style="font-weight:normal">this is normal</span>
-</pre>
+<img src="http://i.imgur.com/0XlMxOW.png" width="500px" />
 
 ----
 
@@ -289,9 +281,7 @@ _```strikethrough``` is a synonym for ```line_through```_
 }
 ```
 
-<pre style="color:white; background-color:black; padding: 5px;">
-<span style="text-decoration:underline">decorate me</span>
-</pre>
+<img src="http://i.imgur.com/yW3Cv3U.png" width="500px" />
 
 ----
 
@@ -312,9 +302,7 @@ Multiple colors are applied in the same way as with [match_color](#match_color).
 }
 ```
 
-<pre style="color:white; background-color:black; padding: 5px;">
-this is a <span style="background-color:royalblue">test</span> line
-</pre>
+<img src="http://i.imgur.com/PwKwkZo.png" width="500px" />
 
 ```ruby
 /\d+/ - {
@@ -322,11 +310,11 @@ this is a <span style="background-color:royalblue">test</span> line
 }
 ```
 
-<pre style="color:white; background-color:black; padding: 5px;">
-this has numbers <span style="background-color:red">5</span> and <span style="background-color:red">18</span>
-</pre>
+<img src="http://i.imgur.com/edUPk8A.png" width="500px" />
 
 ----
+
+___WARNING: the rest of the examples in this README lack proper formatting - I'm working on fixing this___
 
 #### match_color
 <a name="match_color" />
