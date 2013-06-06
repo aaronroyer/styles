@@ -169,8 +169,6 @@ the password is: XXXXXX
 
 ## All Properties
 
-___WARNING: the rest of the examples in this README lack proper formatting - I'm working on fixing this___
-
 Text Styling:
 
 * [background_color](#background_color)
@@ -216,9 +214,7 @@ _See also: match_background_color_
 }
 ```
 
-<pre style="color:white; background-color:black; padding: 5px;">
-<span style="background-color:royalblue">this line should have background color</span>
-</pre>
+<img src="http://i.imgur.com/V4IZ04C.png" width="450px" />
 
 ----
 
@@ -239,11 +235,11 @@ _See also: match_color_
 }
 ```
 
-<pre style="color:white; background-color:black; padding: 5px;">
-<span style="color:red">this line should have COLOR</span>
-</pre>
+<img src="http://i.imgur.com/9OVwEvu.png" width="500px" />
 
 ----
+
+___WARNING: the rest of the examples in this README lack proper formatting - I'm working on fixing this___
 
 #### font_weight
 <a name="font_weight" />
