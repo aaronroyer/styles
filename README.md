@@ -79,13 +79,7 @@ the line before this is blank
 
 Let’s use the stylesheet we just created above.
 
-<pre style="color:white; background-color:black; padding: 5px;">
-$ cat example.txt | styles my_styles
-<span style="color:royalblue; font-weight:bold; text-decoration:underline;">this is an important line</span>
-<span style="background-color:darkkhaki;">this line is warning you about something</span>
-here is my phone number: <span style="color:green;">555-234-6789</span>
-the line before this is blank
-</pre>
+<img src="http://i.imgur.com/Bf0LHzy.png" width="450px" />
 
 The annoying and blank lines have been hidden and, if your terminal supports it, you should see the colors applied as you expect them.
 
