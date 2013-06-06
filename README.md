@@ -314,8 +314,6 @@ Multiple colors are applied in the same way as with [match_color](#match_color).
 
 ----
 
-___WARNING: the rest of the examples in this README lack proper formatting - I'm working on fixing this___
-
 #### match_color
 <a name="match_color" />
 
@@ -336,9 +334,7 @@ to be applied to the respective groups in the Regexp.
 }
 ```
 
-<pre style="color:white; background-color:black; padding: 5px;">
-this is a <span style="color:royalblue">test</span> line
-</pre>
+<img src="http://i.imgur.com/GDNOGUA.png" width="500px" />
 
 ```ruby
 /\d+/ - {
@@ -346,9 +342,7 @@ this is a <span style="color:royalblue">test</span> line
 }
 ```
 
-<pre style="color:white; background-color:black; padding: 5px;">
-this has numbers <span style="color:red">5</span> and <span style="color:red">18</span>
-</pre>
+<img src="http://i.imgur.com/8j7EVv5.png" width="500px" />
 
 ```ruby
 /(m\w*) (m\w*)/ - {
@@ -356,9 +350,7 @@ this has numbers <span style="color:red">5</span> and <span style="color:red">18
 }
 ```
 
-<pre style="color:white; background-color:black; padding: 5px;">
-this line has <span style="color:royalblue">multiple</span> <span style="color:green">matches</span>
-</pre>
+<img src="http://i.imgur.com/rFwlovk.png" width="500px" />
 
 ----
 
@@ -379,9 +371,7 @@ Multiple match font weights are applied in the same way as with [match_color](#m
 }
 ```
 
-<pre style="color:white; background-color:black; padding: 5px;">
-this is <span style="font-weight:bold">bold</span>
-</pre>
+<img src="http://i.imgur.com/eugXKTg.png" width="500px" />
 
 ----
 
@@ -398,17 +388,17 @@ _```strikethrough``` is a synonym for ```line_through```_
 
 ```ruby
 /^decor\w+/ - {
-  text_decoration: underline
+  match_text_decoration: underline
 }
 ```
 
-<pre style="color:white; background-color:black; padding: 5px;">
-<span style="text-decoration:underline">decorate</span> me
-</pre>
+<img src="http://i.imgur.com/IW0vFCp.png" width="500px" />
 
 ----
 
 ### Layout Properties
+
+___WARNING: the rest of the examples in this README lack proper formatting - I'm working on fixing this___
 
 ----
 
