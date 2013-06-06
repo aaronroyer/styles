@@ -426,9 +426,7 @@ color along with the style you must use a string.
 }
 ```
 
-<pre style="color:white; background-color:black; padding: 5px;">
-<span style="display:inline-block; border:1px solid red; padding:7px; margin:7px 0px 7px 5px;">this is a line for testing</span>
-</pre>
+<img src="http://i.imgur.com/7GYvGPT.png" width="500px" />
 
 ----
 
@@ -448,7 +446,7 @@ Valid values: ```block, inline, inline_block, none, true, false```
 ##### Examples
 
 ```ruby
-# Hide lines that contain a string
+# Hide lines that contain a particular string
 
 'test' - {
   display: none
@@ -495,11 +493,7 @@ You can also use the property names ```margin_top```, ```margin_right```, ```mar
 }
 ```
 
-<pre style="color:white; background-color:black; padding: 5px;">
-a normal line
-<span style="margin:25px 5px 25px 5px;">a special line</span>
-another normal line
-</pre>
+<img src="http://i.imgur.com/avanMqe.png" width="500px" />
 
 ```ruby
 # Different margins can be specified for each side
