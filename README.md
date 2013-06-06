@@ -169,6 +169,8 @@ the password is: XXXXXX
 
 ## All Properties
 
+___WARNING: the rest of the examples in this README lack proper formatting - I'm working on fixing this___
+
 Text Styling:
 
 * [background_color](#background_color)
