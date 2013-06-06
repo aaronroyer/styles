@@ -398,8 +398,6 @@ _```strikethrough``` is a synonym for ```line_through```_
 
 ### Layout Properties
 
-___WARNING: the rest of the examples in this README lack proper formatting - I'm working on fixing this___
-
 ----
 
 #### border
