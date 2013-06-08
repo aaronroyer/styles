@@ -164,6 +164,74 @@ Output
 <img src="http://i.imgur.com/HAkOPKU.png" width="500px" />
 
 
+# Reference
+
+## Selectors
+
+Selectors are used to match lines of input. They are like CSS selectors but instead of matching DOM elements they match some or all of the content of a line.
+
+There are three types of selector: String, Regexp, and Symbol.
+
+### String
+
+Strings are the simplest type of selector. A line matches a String selector when the line text includes the string. The string must exactly match and is case-sensitive.
+
+The String selector
+
+```ruby
+'example'
+```
+
+matches these lines.
+
+```
+example
+  example
+this is an example
+example is here
+```
+
+And does not match these lines.
+
+```
+random other stuff
+EXAMPLE
+this is an Example
+```
+
+ANSI color codes in the line are ignored when matching. So a selector ```'is red'``` will match the following line.
+
+```this is \e[31mred\e[0m```
+
+Note that in your terminal the 3rd word would be red and you would not see the color code characeters, even though they are present in the line. These are stripped before attempting the match to do what (I think) is expected.
+
+### Regexp
+
+Regexp selectors are perhaps the most versatile. If any part of the line matches the Regexp then the line matches the selector.
+
+You can use this to make simple string matches case-insensitive, for example you could use
+
+```ruby
+/example/i
+```
+
+for a case-insensitive version of the example for the String selector. You can, of course, do more complicated things using the crazy power of Ruby Regexps.
+
+ANSI color codes in the line are ignored when matching, as with String selectors.
+
+### Symbol
+
+Symbol selectors match some common types of lines, for convenience.
+
+Right now there are four valid Symbol selectors: ```:blank```, ```:empty```, ```:any```, and ```:all```
+
+```:blank``` - matches lines that are either completely empty or only contain whitespace
+
+```:empty``` - matches lines that are completely empty
+
+```:any``` - matches any line
+
+```:all``` - matches any line (synonym of ```:any```)
 
 ## All Properties
 
