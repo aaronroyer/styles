@@ -233,7 +233,7 @@ Right now there are four valid Symbol selectors: ```:blank```, ```:empty```, ```
 
 ```:all``` - matches any line (synonym of ```:any```)
 
-## All Properties
+## Properties
 
 Text Styling:
 
